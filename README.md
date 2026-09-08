@@ -1,6 +1,8 @@
 # -capstone_2026_duoc_alameda
 
-# Nombre del proyecto: RegistrApp - Capstone DuocUC Alameda
+#Nombre del proyecto
+
+RegistrApp - Capstone DuocUC Alameda
 
 
 ## Descripción
