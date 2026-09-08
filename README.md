@@ -1,4 +1,4 @@
-# -capstone_2026_duoc_alameda
+# capstone_2026_duoc_alameda
 
 ## Nombre del proyecto
 
