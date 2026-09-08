@@ -6,7 +6,7 @@ Descripción: Plataforma web de gestión de asistencia mediante código QR firma
 
 Tecnologías utilizadas (lenguajes, frameworks, base de datos, cloud): Angular 18, PrimeNG, angularx-qrcode, PostgreSQL en Supabase, Supabase Auth, Edge Functions (Deno/TS), SheetJS, pdfmake y Vercel.
 
-Instrucciones para ejecutar el proyecto localmente: (Pendiente de definición)
+Instrucciones para ejecutar el proyecto localmente: (En Construcción)
 
 Integrantes del equipo con sus roles: Vicente Moya (Desarrollador), Marcos Tapia (Desarrollador) y Felipe Antonio Krauss (Docente).
 
