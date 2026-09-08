@@ -1,15 +1,15 @@
 # capstone_2026_duoc_alameda
 
-## Nombre del proyecto
+Nombre del proyecto
 
 RegistrApp - Capstone DuocUC Alameda
 
 
-## Descripción
+Descripción
 
 RegistrApp es una plataforma web de gestión de asistencia mediante código QR firmado. Este sistema busca sustituir la tradicional pasada de lista en papel por un código QR de vigencia breve. Permite un proceso ágil en el que el responsable proyecta el código y los miembros lo escanean, registrando la marca en vivo en el servidor. Además, cuenta con seguridad de nivel empresarial mediante la autenticación por rol y firma de tokens criptográficos.
 
-## Tecnologías utilizadas
+Tecnologías utilizadas
 
 * **Frontend:** Angular 18 (framework principal standalone), PrimeNG (componentes accesibles) y angularx-qrcode (renderizado de QR).
 
@@ -32,12 +32,11 @@ RegistrApp es una plataforma web de gestión de asistencia mediante código QR f
 * **Testing:** Pruebas unitarias con Jasmine y Karma, y de extremo a extremo con Playwright.
 
 
-
-## Instrucciones para ejecutar el proyecto localmente
+Instrucciones para ejecutar el proyecto localmente
 
 *(En construcción)*
 
-## Integrantes del equipo con sus roles
+Integrantes del equipo con sus roles
 
 * **Vicente Moya:** Integrante del equipo / Desarrollador
 
@@ -47,11 +46,11 @@ RegistrApp es una plataforma web de gestión de asistencia mediante código QR f
 
 * **Felipe Antonio Krauss:** Docente
 
-## Metodología de trabajo del equipo
+Metodología de trabajo del equipo
 
 El equipo trabaja bajo la metodología ágil **Scrum**, organizada en Sprints de 2 semanas. La gestión del proyecto se lleva a cabo mediante planificación por épicas, estimación en puntos de función y control de avance a través de un tablero.
 
-## Arquitectura de la solución
+Arquitectura de la solución
 
 La arquitectura está estructurada en tres capas principales:
 
