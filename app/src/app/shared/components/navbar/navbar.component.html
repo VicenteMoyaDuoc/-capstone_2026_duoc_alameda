@@ -1,0 +1,13 @@
+<header class="navbar">
+  <span class="titulo">{{ titulo() }}</span>
+
+  <div class="usuario">
+    @if (auth.currentUser(); as usuario) {
+      <span class="avatar">{{ iniciales(usuario.nombre_completo) }}</span>
+      <span class="nombre">{{ usuario.nombre_completo }}</span>
+    }
+    <button type="button" class="boton-salir" title="Cerrar sesión" (click)="cerrarSesion()">
+      <i class="pi pi-sign-out"></i>
+    </button>
+  </div>
+</header>

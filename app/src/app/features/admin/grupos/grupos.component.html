@@ -1,0 +1,66 @@
+<div class="encabezado">
+  <div>
+    <h1>Grupos</h1>
+    <p class="subtitulo">Cursos o departamentos de tu institución</p>
+  </div>
+  <button pButton type="button" label="Nuevo grupo" icon="pi pi-plus" (click)="abrirDialogo()"></button>
+</div>
+
+@if (error() && !mostrarDialogo()) {
+  <p-message severity="error" [text]="error()!" />
+}
+
+<div class="tabla-card">
+  <p-table [value]="grupos()" [loading]="cargando()" styleClass="p-datatable-sm">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Responsable</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-grupo>
+      <tr>
+        <td class="celda-nombre">{{ grupo.nombre }}</td>
+        <td>
+          @if (grupo.responsable?.nombre_completo; as nombre) {
+            <span class="chip-responsable">{{ nombre }}</span>
+          } @else {
+            <span class="sin-asignar">Sin asignar</span>
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="2">Aún no hay grupos creados.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog header="Nuevo grupo" [(visible)]="mostrarDialogo" [modal]="true" [style]="{ width: '400px' }">
+  <form class="form-grupo" [formGroup]="form" (ngSubmit)="crearGrupo()">
+    <div class="campo">
+      <label for="nombre">Nombre del grupo</label>
+      <input pInputText id="nombre" formControlName="nombre" />
+    </div>
+
+    <div class="campo">
+      <label for="responsable">Responsable</label>
+      <p-select
+        id="responsable"
+        formControlName="responsable_id"
+        [options]="responsables()"
+        optionLabel="nombre_completo"
+        optionValue="id"
+        placeholder="Selecciona un responsable"
+      />
+    </div>
+
+    @if (error()) {
+      <p-message severity="error" [text]="error()!" />
+    }
+
+    <button pButton type="submit" label="Crear grupo" [loading]="guardando()"></button>
+  </form>
+</p-dialog>

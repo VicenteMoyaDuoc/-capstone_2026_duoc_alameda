@@ -1,0 +1,151 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 264px;
+  flex-shrink: 0;
+  background: var(--rp-ink);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+
+  .marca-icono {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--rp-accent);
+    color: var(--rp-accent-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .marca-nombre {
+    color: #fff;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    color: #a4a6b3;
+    text-decoration: none;
+    font-size: 14.5px;
+    font-weight: 500;
+    transition: background 0.15s ease, color 0.15s ease;
+
+    i {
+      font-size: 15px;
+      width: 16px;
+      text-align: center;
+    }
+
+    &:hover {
+      background: var(--rp-ink-soft);
+      color: #fff;
+    }
+
+    &.activo {
+      background: var(--rp-accent);
+      color: var(--rp-accent-ink);
+      font-weight: 700;
+    }
+  }
+}
+
+.tarjeta-usuario {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--rp-ink-soft);
+  border: 1px solid var(--rp-ink-border);
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--rp-accent);
+    color: var(--rp-accent-ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .datos-usuario {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
+
+    .nombre {
+      color: #fff;
+      font-size: 13.5px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rol {
+      color: #838591;
+      font-size: 12px;
+    }
+  }
+
+  .boton-salir {
+    background: transparent;
+    border: none;
+    color: #838591;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+
+    &:hover {
+      background: var(--rp-ink-border);
+      color: #fff;
+    }
+  }
+}
+
+.contenido {
+  flex: 1;
+  min-width: 0;
+  background: var(--rp-bg);
+
+  main {
+    padding: 32px 40px;
+    max-width: 1100px;
+  }
+}

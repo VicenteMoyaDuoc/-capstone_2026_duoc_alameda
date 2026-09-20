@@ -1,0 +1,29 @@
+<div class="pagina">
+  <app-navbar titulo="Panel de responsable" />
+
+  <main class="panel">
+    @if (!cargando()) {
+      @if (nombreGrupo(); as nombre) {
+        <h1>{{ nombre }}</h1>
+        <p class="subtitulo">Miembros de tu grupo</p>
+
+        <p-message severity="info" text="La generación de sesiones de asistencia estará disponible próximamente." />
+
+        <div class="lista-card">
+          <ul class="lista-miembros">
+            @for (miembro of miembros(); track miembro.id) {
+              <li>
+                <span class="avatar">{{ miembro.nombre_completo.charAt(0) }}</span>
+                {{ miembro.nombre_completo }}
+              </li>
+            } @empty {
+              <li class="vacio">Este grupo aún no tiene miembros.</li>
+            }
+          </ul>
+        </div>
+      } @else {
+        <p-message severity="warn" text="No tienes un grupo asignado todavía." />
+      }
+    }
+  </main>
+</div>

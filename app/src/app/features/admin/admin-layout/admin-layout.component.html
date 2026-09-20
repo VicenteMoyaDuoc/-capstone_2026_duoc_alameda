@@ -1,0 +1,33 @@
+<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="marca">
+      <span class="marca-icono"><i class="pi pi-qrcode"></i></span>
+      <span class="marca-nombre">Registrapp</span>
+    </div>
+
+    <nav>
+      <a routerLink="dashboard" routerLinkActive="activo"><i class="pi pi-th-large"></i> Dashboard</a>
+      <a routerLink="instituciones" routerLinkActive="activo"><i class="pi pi-building"></i> Institución</a>
+      <a routerLink="grupos" routerLinkActive="activo"><i class="pi pi-users"></i> Grupos</a>
+    </nav>
+
+    @if (auth.currentUser(); as usuario) {
+      <div class="tarjeta-usuario">
+        <span class="avatar">{{ iniciales(usuario.nombre_completo) }}</span>
+        <div class="datos-usuario">
+          <span class="nombre">{{ usuario.nombre_completo }}</span>
+          <span class="rol">Administrador</span>
+        </div>
+        <button type="button" class="boton-salir" title="Cerrar sesión" (click)="auth.logout()">
+          <i class="pi pi-sign-out"></i>
+        </button>
+      </div>
+    }
+  </aside>
+
+  <div class="contenido">
+    <main>
+      <router-outlet />
+    </main>
+  </div>
+</div>

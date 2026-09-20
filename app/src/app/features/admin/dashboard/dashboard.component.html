@@ -1,0 +1,20 @@
+<h1>Dashboard</h1>
+<p class="subtitulo">Resumen de tu institución</p>
+
+<div class="tarjetas">
+  <div class="tarjeta">
+    <span class="icono icono--verde"><i class="pi pi-sitemap"></i></span>
+    <div class="datos">
+      <span class="numero">{{ cargando() ? '—' : totalGrupos() }}</span>
+      <span class="etiqueta">Grupos</span>
+    </div>
+  </div>
+
+  <div class="tarjeta">
+    <span class="icono icono--morado"><i class="pi pi-users"></i></span>
+    <div class="datos">
+      <span class="numero">{{ cargando() ? '—' : totalMiembros() }}</span>
+      <span class="etiqueta">Miembros</span>
+    </div>
+  </div>
+</div>

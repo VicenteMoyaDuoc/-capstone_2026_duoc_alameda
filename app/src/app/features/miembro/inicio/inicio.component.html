@@ -1,0 +1,14 @@
+<div class="pagina">
+  <app-navbar titulo="Registrapp" />
+
+  <main class="inicio">
+    @if (!cargando() && usuario; as u) {
+      <h1>Hola, {{ u.nombre_completo }}</h1>
+      <p class="grupo">
+        Grupo: <strong>{{ nombreGrupo() ?? 'Sin grupo asignado' }}</strong>
+      </p>
+
+      <p-message severity="info" text="El escaneo de código QR para marcar asistencia estará disponible próximamente." />
+    }
+  </main>
+</div>

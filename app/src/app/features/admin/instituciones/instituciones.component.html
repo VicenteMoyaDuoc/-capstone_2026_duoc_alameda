@@ -1,0 +1,22 @@
+<h1>Institución</h1>
+<p class="subtitulo">Datos generales de tu institución</p>
+
+@if (!cargando()) {
+  <form class="form-institucion" [formGroup]="form" (ngSubmit)="guardar()">
+    <div class="campo">
+      <label for="nombre">Nombre</label>
+      <input pInputText id="nombre" formControlName="nombre" />
+    </div>
+
+    <div class="campo">
+      <label for="tipo">Tipo</label>
+      <p-select id="tipo" formControlName="tipo" [options]="tipos" optionLabel="label" optionValue="value" />
+    </div>
+
+    @if (mensaje(); as m) {
+      <p-message [severity]="m.tipo" [text]="m.texto" />
+    }
+
+    <button pButton type="submit" label="Guardar cambios" [loading]="guardando()"></button>
+  </form>
+}

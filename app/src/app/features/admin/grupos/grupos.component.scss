@@ -1,0 +1,79 @@
+.encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+
+  h1 {
+    font-size: 26px;
+  }
+
+  .subtitulo {
+    margin: 6px 0 0;
+    color: var(--rp-text-muted);
+    font-size: 14.5px;
+  }
+}
+
+.tabla-card {
+  background: var(--rp-surface);
+  border: 1px solid var(--rp-border);
+  box-shadow: var(--rp-shadow-card);
+  border-radius: var(--rp-radius-lg);
+  padding: 8px;
+  overflow: hidden;
+
+  ::ng-deep .p-datatable-table {
+    font-size: 14.5px;
+  }
+
+  ::ng-deep .p-datatable-thead > tr > th {
+    background: transparent;
+    color: var(--rp-text-muted);
+    font-weight: 600;
+    border-color: var(--rp-border);
+  }
+
+  ::ng-deep .p-datatable-tbody > tr > td {
+    border-color: var(--rp-border);
+  }
+}
+
+.celda-nombre {
+  font-weight: 600;
+}
+
+.chip-responsable {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #eaf9d9;
+  color: #5c8a1c;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sin-asignar {
+  color: var(--rp-text-muted);
+  font-size: 13.5px;
+}
+
+.form-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--rp-text-muted);
+  }
+}
