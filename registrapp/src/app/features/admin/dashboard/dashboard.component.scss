@@ -24,6 +24,13 @@ h1 {
   box-shadow: var(--rp-shadow-card);
   padding: 20px 24px;
   min-width: 200px;
+  flex: 1 1 200px;
+}
+
+@media (max-width: 420px) {
+  .tarjeta {
+    min-width: 100%;
+  }
 }
 
 .icono {
@@ -45,11 +52,27 @@ h1 {
     background: #ece7fb;
     color: #6a4fd1;
   }
+
+  &--azul {
+    background: #e3f1fb;
+    color: #2b7bb9;
+  }
+
+  &--naranja {
+    background: #fdecd8;
+    color: #c07a1e;
+  }
+
+  &--rosa {
+    background: #fbe4ec;
+    color: #c44a7a;
+  }
 }
 
 .datos {
   display: flex;
   flex-direction: column;
+  gap: 4px;
 
   .numero {
     font-size: 28px;
@@ -63,4 +86,54 @@ h1 {
     font-size: 13.5px;
     font-weight: 500;
   }
+}
+
+.titulo-tabla {
+  margin: 32px 0 16px;
+  font-size: 18px;
+}
+
+.tabla-card {
+  background: var(--rp-surface);
+  border: 1px solid var(--rp-border);
+  box-shadow: var(--rp-shadow-card);
+  border-radius: var(--rp-radius-lg);
+  padding: 8px;
+  overflow: hidden;
+
+  ::ng-deep .p-datatable-table {
+    font-size: 14.5px;
+  }
+
+  ::ng-deep .p-datatable-thead > tr > th {
+    background: transparent;
+    color: var(--rp-text-muted);
+    font-weight: 600;
+    border-color: var(--rp-border);
+  }
+
+  ::ng-deep .p-datatable-tbody > tr > td {
+    border-color: var(--rp-border);
+  }
+}
+
+.celda-nombre {
+  font-weight: 600;
+}
+
+.vacio {
+  color: var(--rp-text-muted);
+  text-align: center;
+  padding: 20px;
+}
+
+.estado-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  border-radius: var(--rp-radius-md);
+  background: #fdecea;
+  color: #c0392b;
+  font-size: 14.5px;
 }

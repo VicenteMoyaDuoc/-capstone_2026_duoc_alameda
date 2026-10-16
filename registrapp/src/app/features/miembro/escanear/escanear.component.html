@@ -1,0 +1,36 @@
+<div class="pagina">
+  <app-navbar titulo="Escanear código QR" />
+
+  <main class="escanear">
+    @switch (estado()) {
+      @case ('inicial') {
+        @if (soportaCamara) {
+          <div class="intro">
+            <i class="pi pi-qrcode"></i>
+            <p>Apunta la cámara al código QR que muestra tu responsable.</p>
+            <p-button label="Escanear código QR" icon="pi pi-camera" (onClick)="iniciarEscaneo()" />
+          </div>
+        } @else {
+          <p-message
+            severity="warn"
+            text="Tu navegador no permite usar la cámara aquí. Abre el código QR directamente con la cámara de tu celular."
+          />
+        }
+      }
+      @case ('escaneando') {
+        <video #video class="video-preview" muted playsinline autoplay></video>
+        <p class="ayuda">Apunta la cámara trasera al código QR.</p>
+      }
+      @case ('permiso_denegado') {
+        <p-message
+          severity="warn"
+          text="No pudimos acceder a tu cámara. Revisa los permisos de la app en tu navegador, o abre el código QR directamente con la cámara de tu celular."
+        />
+        <p-button label="Reintentar" icon="pi pi-refresh" (onClick)="iniciarEscaneo()" />
+      }
+      @case ('mostrando_resultado') {
+        <app-resultado-asistencia [resultado]="resultado()" [mostrarEscanearOtro]="true" (escanearOtro)="reintentar()" />
+      }
+    }
+  </main>
+</div>

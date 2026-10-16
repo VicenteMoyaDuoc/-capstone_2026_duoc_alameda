@@ -1,0 +1,46 @@
+@switch (resultado().tipo) {
+  @case ('cargando') {
+    <div class="estado estado-cargando">
+      <i class="pi pi-spin pi-spinner"></i>
+      <p>Registrando tu asistencia…</p>
+    </div>
+  }
+  @case ('exito') {
+    @let r = resultado();
+    @if (r.tipo === 'exito') {
+      <div class="estado estado-exito">
+        <i class="pi pi-check-circle"></i>
+        <h1>{{ r.estado === 'puntual' ? '¡Llegaste a tiempo!' : 'Asistencia registrada' }}</h1>
+        <p class="hora">{{ r.horaTexto }}</p>
+        @if (r.estado === 'tardanza') {
+          <p class="aviso">Quedó marcada como tardanza.</p>
+        }
+        @if (r.asignaturaNombre) {
+          <p class="grupo">{{ r.asignaturaNombre }}</p>
+        }
+        @if (r.grupoNombre) {
+          <p class="grupo">{{ r.grupoNombre }}</p>
+        }
+      </div>
+    }
+  }
+  @case ('error') {
+    @let r = resultado();
+    @if (r.tipo === 'error') {
+      <div class="estado estado-error">
+        <i class="pi pi-times-circle"></i>
+        <h1>No se pudo registrar tu asistencia</h1>
+        <p>{{ r.mensaje }}</p>
+      </div>
+    }
+  }
+}
+
+@if (resultado().tipo !== 'cargando') {
+  <div class="acciones">
+    @if (mostrarEscanearOtro()) {
+      <p-button label="Escanear otro código" icon="pi pi-qrcode" (onClick)="escanearOtro.emit()" />
+    }
+    <a routerLink="/miembro" class="volver">Volver al inicio</a>
+  </div>
+}

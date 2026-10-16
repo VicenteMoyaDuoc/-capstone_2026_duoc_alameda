@@ -1,0 +1,16 @@
+project_id = "cyvkeqjakynfhludgrry"
+
+[functions.crear-institucion]
+verify_jwt = true
+
+[functions.crear-usuario]
+verify_jwt = true
+
+[functions.actualizar-usuario]
+verify_jwt = true
+
+[functions.sesion-asistencia]
+verify_jwt = true
+
+[functions.registrar-asistencia]
+verify_jwt = true

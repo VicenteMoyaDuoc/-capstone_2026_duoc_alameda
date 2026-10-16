@@ -46,11 +46,26 @@
       background: transparent;
       color: var(--rp-text-muted);
       cursor: pointer;
+      flex-shrink: 0;
 
       &:hover {
         background: var(--rp-bg);
         color: var(--rp-text);
       }
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    padding: 14px 16px;
+
+    .titulo {
+      font-size: 0.95rem;
+    }
+
+    .usuario .nombre {
+      display: none;
     }
   }
 }

@@ -6,7 +6,9 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "playwright test"
   },
   "private": true,
   "dependencies": {
@@ -21,23 +23,33 @@
     "@angular/router": "^18.2.0",
     "@primeng/themes": "^18.0.2",
     "@supabase/supabase-js": "^2.116.0",
+    "@types/pdfmake": "^0.3.3",
+    "@zxing/browser": "^0.2.1",
+    "@zxing/library": "^0.23.0",
+    "angularx-qrcode": "^18.0.2",
+    "pdfmake": "^0.3.11",
     "primeicons": "^8.0.1",
     "primeng": "^18.0.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz",
     "zone.js": "~0.14.10"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.2.21",
     "@angular/cli": "^18.2.21",
     "@angular/compiler-cli": "^18.2.0",
+    "@playwright/test": "^1.64.0",
     "@types/jasmine": "~5.1.0",
+    "angular-eslint": "18.4.3",
+    "eslint": "^9.15.0",
     "jasmine-core": "~5.2.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.5.2"
+    "typescript": "~5.5.2",
+    "typescript-eslint": "8.16.0"
   }
 }

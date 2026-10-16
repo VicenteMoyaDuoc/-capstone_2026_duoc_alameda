@@ -1,0 +1,41 @@
+<div class="auth-page">
+  <div class="auth-card">
+    @if (!listo()) {
+      <span class="marca-icono"><i class="pi pi-lock"></i></span>
+      <h1>Elige una nueva contraseña</h1>
+      <p class="subtitulo">Mínimo 10 caracteres.</p>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()">
+        <div class="campo">
+          <label for="password">Nueva contraseña</label>
+          <p-password inputId="password" formControlName="password" [toggleMask]="true" autocomplete="new-password" />
+        </div>
+
+        <div class="campo">
+          <label for="confirmacion">Confirma la contraseña</label>
+          <p-password
+            inputId="confirmacion"
+            formControlName="confirmacion"
+            [toggleMask]="true"
+            [feedback]="false"
+            autocomplete="new-password"
+          />
+          @if (form.touched && form.hasError('noCoincide')) {
+            <span class="ayuda-error">Las contraseñas no coinciden.</span>
+          }
+        </div>
+
+        @if (error()) {
+          <p-message severity="error" [text]="error()!" />
+        }
+
+        <button pButton type="submit" [loading]="cargando()" [disabled]="cargando()">Guardar contraseña</button>
+      </form>
+    } @else {
+      <span class="marca-icono exito"><i class="pi pi-check"></i></span>
+      <h1>Contraseña actualizada</h1>
+      <p class="subtitulo">Ya puedes iniciar sesión con tu nueva contraseña. Te llevamos al login...</p>
+      <a routerLink="/login" class="boton-enlace">Ir ahora</a>
+    }
+  </div>
+</div>

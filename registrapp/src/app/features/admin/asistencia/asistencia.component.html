@@ -1,0 +1,56 @@
+<div class="asistencia">
+  <h1>Asistencia en vivo</h1>
+  <p class="subtitulo">Mira las {{ terminologia.sesiones().toLowerCase() }} de cualquier {{ terminologia.grupo().toLowerCase() }} de tu institución</p>
+
+  @if (cargando()) {
+    <p class="cargando">Cargando…</p>
+  } @else if (grupos().length === 0) {
+    <p-message severity="warn" [text]="'Todavía no hay ' + terminologia.grupos().toLowerCase() + ' creados.'" />
+  } @else {
+    <div class="filtros">
+      <div class="filtro">
+        <label for="filtro-curso">{{ terminologia.grupo() }}</label>
+        <p-select
+          inputId="filtro-curso"
+          [options]="grupos()"
+          optionLabel="nombre"
+          optionValue="id"
+          [ngModel]="grupoSeleccionadoId()"
+          (ngModelChange)="grupoSeleccionadoId.set($event); onFiltroCambiado()"
+        />
+      </div>
+      <div class="filtro">
+        <label for="filtro-fecha">Fecha</label>
+        <p-datepicker
+          inputId="filtro-fecha"
+          [ngModel]="fechaSeleccionada()"
+          (ngModelChange)="fechaSeleccionada.set($event); onFiltroCambiado()"
+          dateFormat="dd-mm-yy"
+          [showIcon]="true"
+        />
+      </div>
+    </div>
+
+    @if (cargandoSesiones()) {
+      <p class="cargando">Cargando…</p>
+    } @else if (sesionesDelDia().length === 0) {
+      <p-message severity="info" text="No hay sesiones registradas ese día para este grupo." />
+    } @else {
+      @for (sesion of sesionesDelDia(); track sesion.id) {
+        <section class="sesion-card">
+          <header>
+            <span class="hora-inicio">{{ formatearHoraInicio(sesion.inicio) }}</span>
+            <span class="estado-sesion" [class.abierta]="!sesion.cerrada_en">
+              {{ sesion.cerrada_en ? 'Cerrada' : 'En curso' }}
+            </span>
+          </header>
+          <app-lista-asistencia
+            [grupoId]="grupoSeleccionadoId()!"
+            [sesionId]="sesion.id"
+            [modo]="sesion.cerrada_en ? 'estatico' : 'vivo'"
+          />
+        </section>
+      }
+    }
+  }
+</div>

@@ -2,6 +2,8 @@ import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
+import { MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import Aura from '@primeng/themes/aura';
 import { definePreset } from '@primeng/themes';
 
@@ -37,6 +39,8 @@ export const appConfig: ApplicationConfig = {
           darkModeSelector: false
         }
       }
-    })
+    }),
+    MessageService,
+    ConfirmationService
   ]
 };

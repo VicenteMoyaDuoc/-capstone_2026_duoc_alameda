@@ -16,6 +16,21 @@
   }
 }
 
+.filtros {
+  margin-bottom: 16px;
+
+  .busqueda {
+    width: 100%;
+    max-width: 320px;
+  }
+}
+
+.celda-acciones {
+  display: flex;
+  gap: 2px;
+  justify-content: flex-end;
+}
+
 .tabla-card {
   background: var(--rp-surface);
   border: 1px solid var(--rp-border);
@@ -75,5 +90,67 @@
     font-size: 13.5px;
     font-weight: 600;
     color: var(--rp-text-muted);
+  }
+
+  input,
+  ::ng-deep .p-select {
+    width: 100%;
+  }
+}
+
+.encabezado-asignaturas {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .subtitulo {
+    margin: 0;
+    color: var(--rp-text-muted);
+    font-size: 13.5px;
+  }
+}
+
+.lista-asignaturas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--rp-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+.info-asignatura {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nombre-asignatura {
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+    }
   }
 }

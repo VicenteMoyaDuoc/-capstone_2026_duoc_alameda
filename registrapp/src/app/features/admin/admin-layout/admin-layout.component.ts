@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { TerminologiaService } from '../../../core/services/terminologia.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -11,6 +12,8 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class AdminLayoutComponent {
   readonly auth = inject(AuthService);
+  readonly terminologia = inject(TerminologiaService);
+  readonly menuAbierto = signal(false);
 
   iniciales(nombreCompleto: string): string {
     return nombreCompleto
@@ -19,5 +22,13 @@ export class AdminLayoutComponent {
       .slice(0, 2)
       .map((parte) => parte[0]?.toUpperCase())
       .join('');
+  }
+
+  abrirMenu(): void {
+    this.menuAbierto.set(true);
+  }
+
+  cerrarMenu(): void {
+    this.menuAbierto.set(false);
   }
 }

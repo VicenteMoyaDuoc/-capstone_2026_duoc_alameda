@@ -10,9 +10,12 @@
     </div>
 
     <div class="campo">
-      <label for="password">Contraseña</label>
+      <div class="campo-encabezado">
+        <label for="password">Contraseña</label>
+        <a routerLink="/recuperar" class="enlace-sutil">¿Olvidaste tu contraseña?</a>
+      </div>
       <p-password
-        id="password"
+        inputId="password"
         formControlName="password"
         [feedback]="false"
         [toggleMask]="true"
@@ -24,6 +27,17 @@
       <p-message severity="error" [text]="error()!" />
     }
 
-    <button pButton type="submit" label="Ingresar" [loading]="cargando()" class="boton-ingresar"></button>
+    <button
+      pButton
+      type="submit"
+      [loading]="cargando()"
+      [disabled]="cargando()"
+      class="boton-ingresar"
+    >Ingresar</button>
+
+    <p class="pie">
+      ¿Nueva institución?
+      <a routerLink="/registro">Regístrala aquí</a>
+    </p>
   </form>
 </div>

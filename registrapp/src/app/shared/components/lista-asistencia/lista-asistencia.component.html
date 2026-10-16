@@ -1,0 +1,37 @@
+<div class="lista-asistencia">
+  @if (esVivo() && (estadoConexion() === 'reconectando' || estadoConexion() === 'polling')) {
+    <div class="aviso-conexion">
+      <i class="pi pi-exclamation-triangle"></i>
+      Conexión en vivo interrumpida{{ estadoConexion() === 'polling' ? ' — actualizando cada 10 s' : ', reconectando…' }}
+    </div>
+  }
+
+  <header class="encabezado">
+    <div class="contadores">
+      <span class="contador"><strong>{{ presentes() }}</strong> de {{ total() }} presentes</span>
+      <span class="contador contador-tardanza"><strong>{{ tardanzas() }}</strong> tardanzas</span>
+    </div>
+    <p-selectbutton [options]="opcionesOrden" [ngModel]="ordenPor()" (ngModelChange)="ordenPor.set($event)" optionLabel="label" optionValue="value" />
+  </header>
+
+  @if (cargando()) {
+    <p class="cargando">Cargando…</p>
+  } @else {
+    <ul class="roster">
+      @for (fila of filasOrdenadas(); track fila.usuario_id) {
+        <li [class]="'estado-' + fila.estado" [class.recien-llegado]="fila.recienLlegado">
+          <i class="pi" [class.pi-check-circle]="fila.estado === 'puntual'" [class.pi-clock]="fila.estado === 'tardanza'" [class.pi-minus-circle]="fila.estado === 'ausente'"></i>
+          <span class="nombre">{{ fila.nombre_completo }}</span>
+          <span class="estado-texto">
+            {{ fila.estado === 'puntual' ? 'Presente (a tiempo)' : fila.estado === 'tardanza' ? 'Presente (tardanza)' : 'Ausente' }}
+          </span>
+          @if (fila.registrado_en) {
+            <span class="hora">{{ fila.registrado_en | date: 'HH:mm' : 'America/Santiago' }}</span>
+          }
+        </li>
+      } @empty {
+        <li class="vacio">Este grupo no tiene miembros activos.</li>
+      }
+    </ul>
+  }
+</div>

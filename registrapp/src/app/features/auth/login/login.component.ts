@@ -1,16 +1,17 @@
 import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { AuthService } from '../../../core/services/auth.service';
+import { hayTokenPendiente } from '../../../core/utils/asistir-pendiente';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, InputTextModule, PasswordModule, ButtonModule, MessageModule],
+  imports: [ReactiveFormsModule, RouterLink, InputTextModule, PasswordModule, ButtonModule, MessageModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -40,9 +41,20 @@ export class LoginComponent {
 
     try {
       const usuario = await this.auth.login(email, password);
-      await this.router.navigateByUrl(this.auth.rutaSegunRol(usuario.rol));
+
+      if (!usuario) {
+        await this.router.navigateByUrl('/onboarding/institucion');
+        return;
+      }
+
+      if (!usuario.debe_cambiar_password && hayTokenPendiente()) {
+        await this.router.navigateByUrl('/asistir');
+        return;
+      }
+
+      await this.router.navigateByUrl(this.auth.rutaSegunEstado(usuario));
     } catch (err) {
-      this.error.set(err instanceof Error ? err.message : 'No se pudo iniciar sesión.');
+      this.error.set(err instanceof Error ? err.message : 'Correo o contraseña incorrectos.');
     } finally {
       this.cargando.set(false);
     }

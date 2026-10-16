@@ -1,14 +1,51 @@
 <div class="admin-layout">
-  <aside class="sidebar">
+  <header class="topbar-movil">
+    <button type="button" class="boton-menu" aria-label="Abrir menú" (click)="abrirMenu()">
+      <i class="pi pi-bars"></i>
+    </button>
+    <div class="marca">
+      <span class="marca-icono"><i class="pi pi-qrcode"></i></span>
+      <span class="marca-nombre">Registrapp</span>
+    </div>
+  </header>
+
+  @if (menuAbierto()) {
+    <div
+      class="fondo-overlay"
+      role="button"
+      tabindex="0"
+      aria-label="Cerrar menú"
+      (click)="cerrarMenu()"
+      (keydown.enter)="cerrarMenu()"
+      (keydown.space)="cerrarMenu()"
+    ></div>
+  }
+
+  <aside class="sidebar" [class.abierto]="menuAbierto()">
     <div class="marca">
       <span class="marca-icono"><i class="pi pi-qrcode"></i></span>
       <span class="marca-nombre">Registrapp</span>
     </div>
 
     <nav>
-      <a routerLink="dashboard" routerLinkActive="activo"><i class="pi pi-th-large"></i> Dashboard</a>
-      <a routerLink="instituciones" routerLinkActive="activo"><i class="pi pi-building"></i> Institución</a>
-      <a routerLink="grupos" routerLinkActive="activo"><i class="pi pi-users"></i> Grupos</a>
+      <a routerLink="dashboard" routerLinkActive="activo" (click)="cerrarMenu()">
+        <i class="pi pi-th-large"></i> Dashboard
+      </a>
+      <a routerLink="institucion" routerLinkActive="activo" (click)="cerrarMenu()">
+        <i class="pi pi-building"></i> Institución
+      </a>
+      <a routerLink="grupos" routerLinkActive="activo" (click)="cerrarMenu()">
+        <i class="pi pi-sitemap"></i> {{ terminologia.grupos() }}
+      </a>
+      <a routerLink="usuarios" routerLinkActive="activo" (click)="cerrarMenu()">
+        <i class="pi pi-users"></i> Usuarios
+      </a>
+      <a routerLink="asistencia" routerLinkActive="activo" (click)="cerrarMenu()">
+        <i class="pi pi-wifi"></i> Asistencia en vivo
+      </a>
+      <a routerLink="reportes" routerLinkActive="activo" (click)="cerrarMenu()">
+        <i class="pi pi-chart-bar"></i> Reportes
+      </a>
     </nav>
 
     @if (auth.currentUser(); as usuario) {

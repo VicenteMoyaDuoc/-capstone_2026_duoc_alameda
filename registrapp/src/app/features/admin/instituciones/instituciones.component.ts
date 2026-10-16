@@ -1,16 +1,17 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
-import { SelectModule } from 'primeng/select';
+import { InputNumberModule } from 'primeng/inputnumber';
 import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { TerminologiaService } from '../../../core/services/terminologia.service';
 
 @Component({
   selector: 'app-instituciones',
   standalone: true,
-  imports: [ReactiveFormsModule, InputTextModule, SelectModule, ButtonModule, MessageModule],
+  imports: [ReactiveFormsModule, InputTextModule, InputNumberModule, ButtonModule, MessageModule],
   templateUrl: './instituciones.component.html',
   styleUrl: './instituciones.component.scss'
 })
@@ -18,19 +19,18 @@ export class InstitucionesComponent {
   private readonly fb = inject(FormBuilder);
   private readonly supabase = inject(SupabaseService).client;
   private readonly auth = inject(AuthService);
+  readonly terminologia = inject(TerminologiaService);
 
   readonly cargando = signal(true);
   readonly guardando = signal(false);
   readonly mensaje = signal<{ tipo: 'success' | 'error'; texto: string } | null>(null);
-
-  readonly tipos = [
-    { label: 'Educativa', value: 'educativa' },
-    { label: 'Corporativa', value: 'corporativa' }
-  ];
+  readonly tipoInstitucion = signal<'educativa' | 'corporativa'>('educativa');
 
   readonly form = this.fb.nonNullable.group({
-    nombre: ['', Validators.required],
-    tipo: ['educativa', Validators.required]
+    nombre: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(120)]],
+    tolerancia_min: [10, [Validators.required, Validators.min(0), Validators.max(120)]],
+    duracion_sesion_min: [90, [Validators.required, Validators.min(5), Validators.max(480)]],
+    qr_ttl_seg: [60, [Validators.required, Validators.min(20), Validators.max(300)]]
   });
 
   constructor() {
@@ -48,7 +48,13 @@ export class InstitucionesComponent {
     const { data } = await this.supabase.from('instituciones').select('*').eq('id', institucionId).single();
 
     if (data) {
-      this.form.patchValue({ nombre: data['nombre'], tipo: data['tipo'] });
+      this.tipoInstitucion.set(data['tipo']);
+      this.form.patchValue({
+        nombre: data['nombre'],
+        tolerancia_min: data['tolerancia_min'],
+        duracion_sesion_min: data['duracion_sesion_min'],
+        qr_ttl_seg: data['qr_ttl_seg']
+      });
     }
 
     this.cargando.set(false);

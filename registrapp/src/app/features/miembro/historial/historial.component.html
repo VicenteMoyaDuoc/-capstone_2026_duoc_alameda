@@ -1,0 +1,44 @@
+<div class="pagina">
+  <app-navbar titulo="Mi historial" />
+
+  <main class="historial">
+    <h1>Mi historial de {{ terminologia.sesiones().toLowerCase() }}</h1>
+
+    @if (!cargando()) {
+      <section class="resumen">
+        <div class="tarjeta">
+          <span class="valor">{{ metricas().porcentajeAsistencia !== null ? metricas().porcentajeAsistencia + '%' : '—' }}</span>
+          <span class="etiqueta">Asistencia</span>
+        </div>
+        <div class="tarjeta">
+          <span class="valor">{{ metricas().asistidas }}</span>
+          <span class="etiqueta">Presentes</span>
+        </div>
+        <div class="tarjeta">
+          <span class="valor">{{ metricas().tardanzas }}</span>
+          <span class="etiqueta">Tardanzas</span>
+        </div>
+      </section>
+
+      @if (filasOrdenadas().length > 0) {
+        <ul class="lista">
+          @for (fila of filasOrdenadas(); track fila.sesion_id) {
+            <li>
+              <div class="fecha">
+                <strong>{{ formatearFecha(fila.fecha) }}</strong>
+                @if (fila.registrado_en) {
+                  <span>{{ formatearHora(fila.registrado_en) }}</span>
+                }
+              </div>
+              <span class="estado" [class.tardanza]="fila.estado === 'tardanza'" [class.ausente]="fila.estado === 'ausente'">
+                {{ fila.estado === 'puntual' ? 'A tiempo' : fila.estado === 'tardanza' ? 'Tardanza' : 'Ausente' }}
+              </span>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="vacio">Todavía no tienes registros de asistencia.</p>
+      }
+    }
+  </main>
+</div>

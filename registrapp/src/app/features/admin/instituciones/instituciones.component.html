@@ -1,5 +1,5 @@
 <h1>Institución</h1>
-<p class="subtitulo">Datos generales de tu institución</p>
+<p class="subtitulo">Datos generales y configuración</p>
 
 @if (!cargando()) {
   <form class="form-institucion" [formGroup]="form" (ngSubmit)="guardar()">
@@ -10,13 +10,34 @@
 
     <div class="campo">
       <label for="tipo">Tipo</label>
-      <p-select id="tipo" formControlName="tipo" [options]="tipos" optionLabel="label" optionValue="value" />
+      <input pInputText id="tipo" [value]="tipoInstitucion() === 'corporativa' ? 'Corporativa' : 'Educativa'" disabled />
+      <span class="ayuda">El tipo no se puede cambiar después de crear la institución (define la terminología de toda la app).</span>
+    </div>
+
+    <h2>Configuración de asistencia</h2>
+
+    <div class="campo">
+      <label for="tolerancia_min">Tolerancia de tardanza (minutos)</label>
+      <p-inputnumber inputId="tolerancia_min" formControlName="tolerancia_min" [min]="0" [max]="120" suffix=" min" />
+      <span class="ayuda">Hasta este tiempo después del inicio, se marca "puntual". Después, "tardanza". Rango: 0 a 120.</span>
+    </div>
+
+    <div class="campo">
+      <label for="duracion_sesion_min">Duración de la {{ terminologia.sesion().toLowerCase() }} (minutos)</label>
+      <p-inputnumber inputId="duracion_sesion_min" formControlName="duracion_sesion_min" [min]="5" [max]="480" suffix=" min" />
+      <span class="ayuda">Tiempo máximo en que se pueden seguir registrando asistencias. Rango: 5 a 480.</span>
+    </div>
+
+    <div class="campo">
+      <label for="qr_ttl_seg">Vigencia del código QR (segundos)</label>
+      <p-inputnumber inputId="qr_ttl_seg" formControlName="qr_ttl_seg" [min]="20" [max]="300" suffix=" seg" />
+      <span class="ayuda">Cada cuánto rota el QR automáticamente. Rango: 20 a 300.</span>
     </div>
 
     @if (mensaje(); as m) {
       <p-message [severity]="m.tipo" [text]="m.texto" />
     }
 
-    <button pButton type="submit" label="Guardar cambios" [loading]="guardando()"></button>
+    <button pButton type="submit" [loading]="guardando()" [disabled]="guardando()">Guardar cambios</button>
   </form>
 }

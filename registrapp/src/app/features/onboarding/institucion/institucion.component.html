@@ -1,0 +1,31 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <span class="marca-icono"><i class="pi pi-building"></i></span>
+    <h1>Crea tu institución</h1>
+    <p class="subtitulo">Último paso: cuéntanos de tu institución y quedarás como su administrador.</p>
+
+    <form [formGroup]="form" (ngSubmit)="crear()">
+      <div class="campo">
+        <label for="nombre">Nombre de la institución</label>
+        <input pInputText id="nombre" formControlName="nombre" placeholder="Ej: Colegio San Andrés" />
+      </div>
+
+      <div class="campo">
+        <label for="tipo">Tipo</label>
+        <p-select inputId="tipo" formControlName="tipo" [options]="tipos" optionLabel="label" optionValue="value" />
+        <span class="ayuda">Define los nombres que vas a ver en toda la app (curso/profesor/alumno o departamento/jefe de área/empleado). No se puede cambiar después.</span>
+      </div>
+
+      <div class="campo">
+        <label for="nombre_completo">Tu nombre completo</label>
+        <input pInputText id="nombre_completo" formControlName="nombre_completo" placeholder="Como administrador" />
+      </div>
+
+      @if (error()) {
+        <p-message severity="error" [text]="error()!" />
+      }
+
+      <button pButton type="submit" [loading]="cargando()" [disabled]="cargando()">Crear institución</button>
+    </form>
+  </div>
+</div>

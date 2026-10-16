@@ -5,10 +5,19 @@
     @if (!cargando() && usuario; as u) {
       <h1>Hola, {{ u.nombre_completo }}</h1>
       <p class="grupo">
-        Grupo: <strong>{{ nombreGrupo() ?? 'Sin grupo asignado' }}</strong>
+        {{ terminologia.grupo() }}: <strong>{{ nombreGrupo() ?? 'Sin asignar' }}</strong>
       </p>
 
-      <p-message severity="info" text="El escaneo de código QR para marcar asistencia estará disponible próximamente." />
+      <div class="acciones">
+        <a routerLink="/miembro/escanear" class="tarjeta-accion">
+          <i class="pi pi-qrcode"></i>
+          <span>Escanear código QR</span>
+        </a>
+        <a routerLink="/miembro/historial" class="tarjeta-accion">
+          <i class="pi pi-calendar"></i>
+          <span>Mi historial</span>
+        </a>
+      </div>
     }
   </main>
 </div>

@@ -1,0 +1,174 @@
+<div class="reportes">
+  <h1>Reportes</h1>
+  <p class="subtitulo">Asistencia por {{ terminologia.grupo().toLowerCase() }} y por persona</p>
+
+  @if (cargandoFiltros()) {
+    <p class="cargando">Cargando…</p>
+  } @else {
+    <div class="filtros">
+      <div class="filtro">
+        <label for="filtro-curso">{{ terminologia.grupo() }}</label>
+        <p-select
+          inputId="filtro-curso"
+          [options]="opcionesGrupo()"
+          optionLabel="nombre"
+          optionValue="id"
+          [ngModel]="grupoId()"
+          (ngModelChange)="grupoId.set($event); onGrupoCambiado()"
+        />
+      </div>
+
+      <div class="filtro">
+        <label for="filtro-persona">{{ terminologia.miembro() }} (opcional)</label>
+        <p-select
+          inputId="filtro-persona"
+          [options]="opcionesPersona()"
+          optionLabel="nombre_completo"
+          optionValue="id"
+          [ngModel]="usuarioId()"
+          (ngModelChange)="usuarioId.set($event); onPersonaCambiada()"
+        />
+      </div>
+
+      <div class="filtro">
+        <label for="filtro-rango">Rango de fechas</label>
+        <p-datepicker
+          inputId="filtro-rango"
+          [ngModel]="rango()"
+          (ngModelChange)="onRangoCambiado($event)"
+          selectionMode="range"
+          dateFormat="dd-mm-yy"
+          [showIcon]="true"
+        />
+      </div>
+
+      <div class="filtro acciones-exportar">
+        <span class="etiqueta-vacia" aria-hidden="true">&nbsp;</span>
+        <div class="botones">
+          <p-button
+            label="Excel"
+            icon="pi pi-file-excel"
+            severity="success"
+            [outlined]="true"
+            [loading]="exportando() === 'excel'"
+            [disabled]="cargando() || detalle().length === 0"
+            (onClick)="exportar('excel')"
+          />
+          <p-button
+            label="PDF"
+            icon="pi pi-file-pdf"
+            severity="danger"
+            [outlined]="true"
+            [loading]="exportando() === 'pdf'"
+            [disabled]="cargando() || detalle().length === 0"
+            (onClick)="exportar('pdf')"
+          />
+        </div>
+      </div>
+    </div>
+
+    @if (exportando()) {
+      <p-progressbar [value]="progresoExportacion()" />
+    }
+
+    @if (error()) {
+      <p-message severity="error" [text]="error()!" />
+    } @else if (cargando()) {
+      <p class="cargando">Cargando…</p>
+    } @else if (huboConsulta() && detalle().length === 0) {
+      <p-message severity="info" text="No hay sesiones en el período seleccionado." />
+    } @else {
+      <p-tabs value="0">
+        <p-tablist>
+          <p-tab value="0">Resumen por {{ terminologia.grupo().toLowerCase() }}</p-tab>
+          <p-tab value="1">Resumen por persona</p-tab>
+          <p-tab value="2">Detalle</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+          <p-tabpanel value="0">
+            <p-table [value]="resumenGrupo()" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th pSortableColumn="grupo">{{ terminologia.grupo() }} <p-sortIcon field="grupo" /></th>
+                  <th pSortableColumn="sesionesTotal">Sesiones <p-sortIcon field="sesionesTotal" /></th>
+                  <th pSortableColumn="miembrosTotal">Miembros <p-sortIcon field="miembrosTotal" /></th>
+                  <th pSortableColumn="asistidas">Asistidas <p-sortIcon field="asistidas" /></th>
+                  <th pSortableColumn="tardanzas">Tardanzas <p-sortIcon field="tardanzas" /></th>
+                  <th pSortableColumn="porcentajeAsistencia">% Asistencia <p-sortIcon field="porcentajeAsistencia" /></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-fila>
+                <tr>
+                  <td>{{ fila.grupo }}</td>
+                  <td>{{ fila.sesionesTotal }}</td>
+                  <td>{{ fila.miembrosTotal }}</td>
+                  <td>{{ fila.asistidas }}</td>
+                  <td>{{ fila.tardanzas }}</td>
+                  <td>
+                    <span class="indicador" [class]="'indicador-' + nivelAsistencia(fila.porcentajeAsistencia)">
+                      {{ fila.porcentajeAsistencia !== null ? fila.porcentajeAsistencia + '%' : '—' }}
+                    </span>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+
+          <p-tabpanel value="1">
+            <p-table [value]="resumenPersona()" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th pSortableColumn="nombreCompleto">Nombre <p-sortIcon field="nombreCompleto" /></th>
+                  <th pSortableColumn="grupo">{{ terminologia.grupo() }} <p-sortIcon field="grupo" /></th>
+                  <th pSortableColumn="sesionesTotal">Sesiones <p-sortIcon field="sesionesTotal" /></th>
+                  <th pSortableColumn="asistidas">Asistidas <p-sortIcon field="asistidas" /></th>
+                  <th pSortableColumn="tardanzas">Tardanzas <p-sortIcon field="tardanzas" /></th>
+                  <th pSortableColumn="porcentajeAsistencia">% Asistencia <p-sortIcon field="porcentajeAsistencia" /></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-fila>
+                <tr>
+                  <td>{{ fila.nombreCompleto }}</td>
+                  <td>{{ fila.grupo }}</td>
+                  <td>{{ fila.sesionesTotal }}</td>
+                  <td>{{ fila.asistidas }}</td>
+                  <td>{{ fila.tardanzas }}</td>
+                  <td>
+                    <span class="indicador" [class]="'indicador-' + nivelAsistencia(fila.porcentajeAsistencia)">
+                      {{ fila.porcentajeAsistencia !== null ? fila.porcentajeAsistencia + '%' : '—' }}
+                    </span>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+
+          <p-tabpanel value="2">
+            <p-table [value]="detalle()" [paginator]="true" [rows]="15" styleClass="p-datatable-sm">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th pSortableColumn="fecha">Fecha <p-sortIcon field="fecha" /></th>
+                  <th pSortableColumn="grupo">{{ terminologia.grupo() }} <p-sortIcon field="grupo" /></th>
+                  <th pSortableColumn="nombre_completo">Nombre <p-sortIcon field="nombre_completo" /></th>
+                  <th pSortableColumn="estado">Estado <p-sortIcon field="estado" /></th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-fila>
+                <tr>
+                  <td>{{ fila.fecha | date: 'dd-MM-yyyy' : 'America/Santiago' }}</td>
+                  <td>{{ fila.grupo }}</td>
+                  <td>{{ fila.nombre_completo }}</td>
+                  <td>
+                    <span class="estado-badge" [class]="'estado-' + fila.estado">
+                      {{ fila.estado === 'puntual' ? 'Puntual' : fila.estado === 'tardanza' ? 'Tardanza' : 'Ausente' }}
+                    </span>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </p-tabpanel>
+        </p-tabpanels>
+      </p-tabs>
+    }
+  }
+</div>

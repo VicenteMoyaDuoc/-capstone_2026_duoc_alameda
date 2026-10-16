@@ -1,0 +1,26 @@
+<div class="auth-page">
+  <div class="auth-card">
+    @if (!enviado()) {
+      <span class="marca-icono"><i class="pi pi-key"></i></span>
+      <h1>Recuperar contraseña</h1>
+      <p class="subtitulo">Ingresa tu correo y te enviaremos instrucciones para restablecerla.</p>
+
+      <form [formGroup]="form" (ngSubmit)="enviar()">
+        <div class="campo">
+          <label for="email">Correo electrónico</label>
+          <input pInputText id="email" type="email" formControlName="email" autocomplete="email" />
+        </div>
+
+        <button pButton type="submit" [loading]="cargando()" [disabled]="cargando()">Enviar instrucciones</button>
+      </form>
+    } @else {
+      <span class="marca-icono exito"><i class="pi pi-envelope"></i></span>
+      <h1>Revisa tu correo</h1>
+      <p class="subtitulo">Si el correo existe en Registrapp, te enviamos instrucciones para restablecer tu contraseña.</p>
+    }
+
+    <p class="pie">
+      <a routerLink="/login">Volver a iniciar sesión</a>
+    </p>
+  </div>
+</div>

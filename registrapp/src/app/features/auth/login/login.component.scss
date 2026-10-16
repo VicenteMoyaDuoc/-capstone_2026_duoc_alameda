@@ -60,7 +60,51 @@
   }
 }
 
+.campo-encabezado {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.enlace-sutil {
+  font-size: 0.8rem;
+  color: var(--rp-text-muted);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .boton-ingresar {
   margin-top: 0.5rem;
   width: 100%;
+}
+
+.pie {
+  margin: 0.25rem 0 0;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--rp-text-muted);
+
+  a {
+    color: var(--rp-text);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+@media (max-width: 400px) {
+  .login-page {
+    padding: 12px;
+  }
+
+  .login-card {
+    padding: 28px 20px;
+  }
 }

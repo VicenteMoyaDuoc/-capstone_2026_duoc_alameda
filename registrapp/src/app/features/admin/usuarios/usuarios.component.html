@@ -1,0 +1,299 @@
+<div class="encabezado">
+  <div>
+    <h1>Usuarios</h1>
+    <p class="subtitulo">{{ terminologia.responsables() }} y {{ terminologia.miembros().toLowerCase() }} de tu institución</p>
+  </div>
+  <div class="acciones-encabezado">
+    <button pButton type="button" icon="pi pi-upload" severity="secondary" [outlined]="true" (click)="abrirCargaMasiva()">
+      Carga masiva
+    </button>
+    <button pButton type="button" icon="pi pi-plus" (click)="abrirCrear()">Nuevo usuario</button>
+  </div>
+</div>
+
+<div class="filtros">
+  <input
+    pInputText
+    type="text"
+    placeholder="Buscar por nombre o correo"
+    [ngModel]="busqueda()"
+    (ngModelChange)="busqueda.set($event); onFiltroCambiado()"
+    class="busqueda"
+  />
+  <p-select
+    [options]="opcionesRol"
+    [ngModel]="filtroRol()"
+    (ngModelChange)="filtroRol.set($event); onFiltroCambiado()"
+    optionLabel="label"
+    optionValue="value"
+  />
+  <p-select
+    [options]="opcionesGrupoFiltro"
+    [ngModel]="filtroGrupo()"
+    (ngModelChange)="filtroGrupo.set($event); onFiltroCambiado()"
+    optionLabel="label"
+    optionValue="value"
+  />
+  <p-select
+    [options]="opcionesEstado"
+    [ngModel]="filtroEstado()"
+    (ngModelChange)="filtroEstado.set($event); onFiltroCambiado()"
+    optionLabel="label"
+    optionValue="value"
+  />
+</div>
+
+<div class="tabla-card">
+  <p-table
+    [value]="usuarios()"
+    [loading]="cargando()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="filasPorPagina"
+    [totalRecords]="totalRegistros()"
+    (onLazyLoad)="onLazyLoad($event)"
+    styleClass="p-datatable-sm"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nombre</th>
+        <th>Correo</th>
+        <th>Rol</th>
+        <th>{{ terminologia.grupo() }}</th>
+        <th>Estado</th>
+        <th></th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-usuario>
+      <tr>
+        <td class="celda-nombre">{{ usuario.nombre_completo }}</td>
+        <td>{{ usuario.email }}</td>
+        <td>{{ usuario.rol === 'responsable' ? terminologia.responsable() : terminologia.miembro() }}</td>
+        <td>{{ nombreGrupo(usuario.grupo_id) }}</td>
+        <td>
+          <p-tag [severity]="usuario.activo ? 'success' : 'danger'" [value]="usuario.activo ? 'Activo' : 'Desactivado'" />
+        </td>
+        <td class="celda-acciones">
+          <button pButton type="button" icon="pi pi-pencil" severity="secondary" text (click)="abrirEditar(usuario)" title="Editar"></button>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-key"
+            severity="secondary"
+            text
+            (click)="confirmarResetPassword(usuario)"
+            title="Resetear contraseña"
+          ></button>
+          @if (usuario.activo) {
+            <button
+              pButton
+              type="button"
+              icon="pi pi-ban"
+              severity="danger"
+              text
+              (click)="confirmarDesactivar(usuario)"
+              title="Desactivar"
+            ></button>
+          } @else {
+            <button
+              pButton
+              type="button"
+              icon="pi pi-replay"
+              severity="success"
+              text
+              (click)="confirmarReactivar(usuario)"
+              title="Reactivar"
+            ></button>
+          }
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6">Aún no hay usuarios que coincidan con el filtro.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- Diálogo: crear usuario -->
+<p-dialog header="Nuevo usuario" [(visible)]="mostrarCrear" [modal]="true" [style]="{ width: '420px', maxWidth: '92vw' }">
+  <form class="form-usuario" [formGroup]="formCrear" (ngSubmit)="crear()">
+    <div class="campo">
+      <label for="email">Correo electrónico</label>
+      <input pInputText id="email" type="email" formControlName="email" />
+    </div>
+
+    <div class="campo">
+      <label for="nombre_completo">Nombre completo</label>
+      <input pInputText id="nombre_completo" formControlName="nombre_completo" />
+    </div>
+
+    <div class="campo">
+      <label for="rol">Rol</label>
+      <p-select
+        inputId="rol"
+        formControlName="rol"
+        [options]="[
+          { label: terminologia.responsable(), value: 'responsable' },
+          { label: terminologia.miembro(), value: 'miembro' }
+        ]"
+        optionLabel="label"
+        optionValue="value"
+      />
+    </div>
+
+    @if (formCrear.get('rol')?.value === 'miembro') {
+      <div class="campo">
+        <label for="grupo_id">{{ terminologia.grupo() }}</label>
+        <p-select
+          inputId="grupo_id"
+          formControlName="grupo_id"
+          [options]="gruposComoOpciones()"
+          optionLabel="label"
+          optionValue="value"
+          [placeholder]="'Selecciona ' + terminologia.grupo().toLowerCase()"
+        />
+      </div>
+    }
+
+    @if (errorCrear()) {
+      <p-message severity="error" [text]="errorCrear()!" />
+    }
+
+    <button pButton type="submit" [loading]="guardandoCrear()" [disabled]="guardandoCrear()">Crear usuario</button>
+  </form>
+</p-dialog>
+
+<!-- Diálogo: editar usuario -->
+<p-dialog header="Editar usuario" [(visible)]="mostrarEditar" [modal]="true" [style]="{ width: '420px', maxWidth: '92vw' }">
+  <form class="form-usuario" [formGroup]="formEditar" (ngSubmit)="guardarEdicion()">
+    <div class="campo">
+      <label for="nombre_completo_editar">Nombre completo</label>
+      <input pInputText id="nombre_completo_editar" formControlName="nombre_completo" />
+    </div>
+
+    @if (usuarioEditando()?.rol === 'miembro') {
+      <div class="campo">
+        <label for="grupo_id_editar">{{ terminologia.grupo() }}</label>
+        <p-select
+          inputId="grupo_id_editar"
+          formControlName="grupo_id"
+          [options]="gruposComoOpciones()"
+          optionLabel="label"
+          optionValue="value"
+        />
+      </div>
+    }
+
+    @if (errorEditar()) {
+      <p-message severity="error" [text]="errorEditar()!" />
+    }
+
+    <button pButton type="submit" [loading]="guardandoEditar()" [disabled]="guardandoEditar()">Guardar cambios</button>
+  </form>
+</p-dialog>
+
+<!-- Diálogo: contraseña temporal (se muestra una sola vez) -->
+<p-dialog
+  header="Contraseña temporal"
+  [(visible)]="mostrarPassword"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '420px', maxWidth: '92vw' }"
+>
+  <p class="aviso-password">Entrégala al usuario. No se volverá a mostrar.</p>
+  <div class="caja-password">
+    <code>{{ passwordMostrada() }}</code>
+    <button pButton type="button" icon="pi pi-copy" (click)="copiarPassword()">{{ copiado() ? '¡Copiada!' : 'Copiar' }}</button>
+  </div>
+  <button pButton type="button" class="boton-cerrar" (click)="mostrarPassword.set(false)">Listo</button>
+</p-dialog>
+
+<!-- Fase 4 (ampliación) — carga masiva de usuarios -->
+<p-dialog
+  header="Carga masiva de usuarios"
+  [(visible)]="mostrarCargaMasiva"
+  [modal]="true"
+  [style]="{ width: '560px', maxWidth: '94vw' }"
+>
+  <div class="carga-masiva">
+    <p class="subtitulo">
+      Sube un archivo CSV o Excel con columnas: <code>correo</code>, <code>nombre_completo</code>, <code>rol</code>
+      (responsable o miembro) y <code>curso</code> (solo para miembros, el nombre debe coincidir con uno existente).
+    </p>
+
+    <div class="acciones-carga">
+      <button pButton type="button" icon="pi pi-download" severity="secondary" [outlined]="true" (click)="descargarPlantilla()">
+        Descargar plantilla
+      </button>
+      <label class="boton-archivo">
+        <i class="pi pi-file"></i> Elegir archivo (.csv, .xlsx)
+        <input type="file" accept=".csv,.xlsx,.xls" (change)="onArchivoSeleccionado($event)" hidden />
+      </label>
+    </div>
+
+    @if (erroresLectura().length > 0) {
+      <p-message severity="warn" [text]="erroresLectura().length + ' fila(s) con problemas, no se van a procesar:'" />
+      <ul class="lista-errores">
+        @for (err of erroresLectura(); track err) {
+          <li>{{ err }}</li>
+        }
+      </ul>
+    }
+
+    @if (filasCarga().length > 0 && !procesandoCarga() && resultadosCarga().length === 0) {
+      <p-message severity="info" [text]="filasCarga().length + ' fila(s) lista(s) para crear.'" />
+
+      <div class="campo">
+        <label for="password-lote">Contraseña temporal para todo este lote</label>
+        <input pInputText id="password-lote" type="text" [ngModel]="passwordLote()" (ngModelChange)="passwordLote.set($event)" />
+        <span class="ayuda">
+          Todos los usuarios de este archivo van a recibir <strong>esta misma contraseña</strong> para su primer ingreso — es
+          normal, se les va a pedir cambiarla apenas inicien sesión (no pueden hacer nada más hasta que la cambien). Mínimo 10
+          caracteres.
+        </span>
+      </div>
+
+      <button
+        pButton
+        type="button"
+        icon="pi pi-check"
+        [loading]="procesandoCarga()"
+        [disabled]="!passwordLoteValida()"
+        (click)="procesarCargaMasiva()"
+      >
+        Crear {{ filasCarga().length }} usuarios
+      </button>
+    }
+
+    @if (procesandoCarga()) {
+      <p class="cargando">Procesando {{ filasProcesadas() }} de {{ filasCarga().length }}…</p>
+    }
+
+    @if (resultadosCarga().length > 0) {
+      <p-message
+        [severity]="resultadosCarga().length === resultadosCargaExitosas() ? 'success' : 'warn'"
+        [text]="resultadosCargaExitosas() + ' de ' + resultadosCarga().length + ' usuarios creados.'"
+      />
+      @if (resultadosCargaExitosas() > 0) {
+        <div class="caja-password">
+          <span>Contraseña temporal entregada a todos:</span>
+          <code>{{ passwordLote() }}</code>
+          <button pButton type="button" icon="pi pi-copy" (click)="copiarPasswordLote()">{{ copiado() ? '¡Copiada!' : 'Copiar' }}</button>
+        </div>
+      }
+      <ul class="lista-resultados">
+        @for (r of resultadosCarga(); track r.fila) {
+          <li [class.fila-error]="r.estado === 'error'">
+            <span>{{ r.nombre_completo }} ({{ r.correo }})</span>
+            <span class="detalle-resultado">{{ r.estado === 'creado' ? 'Creado' : 'Error: ' + r.detalle }}</span>
+          </li>
+        }
+      </ul>
+      <button pButton type="button" icon="pi pi-download" severity="secondary" [outlined]="true" (click)="descargarResultados()">
+        Descargar resultados
+      </button>
+    }
+  </div>
+</p-dialog>

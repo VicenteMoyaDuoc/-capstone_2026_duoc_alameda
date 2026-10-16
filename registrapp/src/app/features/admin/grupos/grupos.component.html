@@ -1,9 +1,20 @@
 <div class="encabezado">
   <div>
-    <h1>Grupos</h1>
-    <p class="subtitulo">Cursos o departamentos de tu institución</p>
+    <h1>{{ terminologia.grupos() }}</h1>
+    <p class="subtitulo">{{ terminologia.grupos() }} de tu institución</p>
   </div>
-  <button pButton type="button" label="Nuevo grupo" icon="pi pi-plus" (click)="abrirDialogo()"></button>
+  <button pButton type="button" icon="pi pi-plus" (click)="abrirCrear()">{{ 'Nuevo ' + terminologia.grupo().toLowerCase() }}</button>
+</div>
+
+<div class="filtros">
+  <input
+    pInputText
+    type="text"
+    [placeholder]="'Buscar ' + terminologia.grupo().toLowerCase() + ' por nombre'"
+    [ngModel]="busqueda()"
+    (ngModelChange)="busqueda.set($event); onBusquedaCambiada()"
+    class="busqueda"
+  />
 </div>
 
 @if (error() && !mostrarDialogo()) {
@@ -11,11 +22,22 @@
 }
 
 <div class="tabla-card">
-  <p-table [value]="grupos()" [loading]="cargando()" styleClass="p-datatable-sm">
+  <p-table
+    [value]="grupos()"
+    [loading]="cargando()"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="filasPorPagina"
+    [totalRecords]="totalRegistros()"
+    (onLazyLoad)="onLazyLoad($event)"
+    styleClass="p-datatable-sm"
+  >
     <ng-template pTemplate="header">
       <tr>
         <th>Nombre</th>
         <th>Responsable</th>
+        <th>{{ terminologia.miembros() }}</th>
+        <th></th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-grupo>
@@ -28,32 +50,62 @@
             <span class="sin-asignar">Sin asignar</span>
           }
         </td>
+        <td>{{ cantidadMiembros(grupo.id) }}</td>
+        <td class="celda-acciones">
+          @if (terminologia.esEducativa()) {
+            <button
+              pButton
+              type="button"
+              icon="pi pi-book"
+              severity="secondary"
+              text
+              (click)="abrirAsignaturas(grupo)"
+              title="Asignaturas"
+            ></button>
+          }
+          <button pButton type="button" icon="pi pi-pencil" severity="secondary" text (click)="abrirEditar(grupo)" title="Editar"></button>
+          <button
+            pButton
+            type="button"
+            icon="pi pi-inbox"
+            severity="danger"
+            text
+            (click)="confirmarArchivar(grupo)"
+            title="Archivar"
+          ></button>
+        </td>
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="2">Aún no hay grupos creados.</td>
+        <td colspan="4">Aún no hay {{ terminologia.grupos().toLowerCase() }}. Crea el primero.</td>
       </tr>
     </ng-template>
   </p-table>
 </div>
 
-<p-dialog header="Nuevo grupo" [(visible)]="mostrarDialogo" [modal]="true" [style]="{ width: '400px' }">
-  <form class="form-grupo" [formGroup]="form" (ngSubmit)="crearGrupo()">
+<p-dialog
+  [header]="editando() ? 'Editar ' + terminologia.grupo().toLowerCase() : 'Nuevo ' + terminologia.grupo().toLowerCase()"
+  [(visible)]="mostrarDialogo"
+  [modal]="true"
+  [style]="{ width: '400px', maxWidth: '92vw' }"
+>
+  <form class="form-grupo" [formGroup]="form" (ngSubmit)="guardar()">
     <div class="campo">
-      <label for="nombre">Nombre del grupo</label>
+      <label for="nombre">Nombre</label>
       <input pInputText id="nombre" formControlName="nombre" />
     </div>
 
     <div class="campo">
       <label for="responsable">Responsable</label>
       <p-select
-        id="responsable"
+        inputId="responsable"
         formControlName="responsable_id"
         [options]="responsables()"
         optionLabel="nombre_completo"
         optionValue="id"
-        placeholder="Selecciona un responsable"
+        [showClear]="true"
+        placeholder="Sin responsable"
       />
     </div>
 
@@ -61,6 +113,96 @@
       <p-message severity="error" [text]="error()!" />
     }
 
-    <button pButton type="submit" label="Crear grupo" [loading]="guardando()"></button>
+    <button pButton type="submit" [loading]="guardando()" [disabled]="guardando()">{{ editando() ? 'Guardar cambios' : 'Crear' }}</button>
+  </form>
+</p-dialog>
+
+<!-- Fase 4 (ampliación) — asignaturas del curso -->
+<p-dialog
+  [header]="'Asignaturas de ' + (grupoParaAsignaturas()?.nombre ?? '')"
+  [(visible)]="mostrarAsignaturas"
+  [modal]="true"
+  [style]="{ width: '480px', maxWidth: '92vw' }"
+  (onHide)="cerrarAsignaturas()"
+>
+  <div class="encabezado-asignaturas">
+    <p class="subtitulo">Cada asignatura tiene su propio profesor y su propia sesión de asistencia.</p>
+    <button pButton type="button" icon="pi pi-plus" size="small" (click)="abrirCrearAsignatura()">Nueva asignatura</button>
+  </div>
+
+  @if (cargandoAsignaturas()) {
+    <p class="cargando">Cargando…</p>
+  } @else if (asignaturasDelGrupo().length === 0) {
+    <p class="sin-asignar">Aún no hay asignaturas en este curso.</p>
+  } @else {
+    <ul class="lista-asignaturas">
+      @for (asignatura of asignaturasDelGrupo(); track asignatura.id) {
+        <li>
+          <div class="info-asignatura">
+            <span class="nombre-asignatura">{{ asignatura.nombre }}</span>
+            @if (asignatura.responsable?.nombre_completo; as nombre) {
+              <span class="chip-responsable">{{ nombre }}</span>
+            } @else {
+              <span class="sin-asignar">Sin profesor asignado</span>
+            }
+          </div>
+          <div class="celda-acciones">
+            <button
+              pButton
+              type="button"
+              icon="pi pi-pencil"
+              severity="secondary"
+              text
+              (click)="abrirEditarAsignatura(asignatura)"
+              title="Editar"
+            ></button>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-inbox"
+              severity="danger"
+              text
+              (click)="confirmarArchivarAsignatura(asignatura)"
+              title="Archivar"
+            ></button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</p-dialog>
+
+<p-dialog
+  [header]="editandoAsignatura() ? 'Editar asignatura' : 'Nueva asignatura'"
+  [(visible)]="mostrarFormAsignatura"
+  [modal]="true"
+  [style]="{ width: '400px', maxWidth: '92vw' }"
+>
+  <form class="form-grupo" [formGroup]="formAsignatura" (ngSubmit)="guardarAsignatura()">
+    <div class="campo">
+      <label for="nombre-asignatura">Nombre</label>
+      <input pInputText id="nombre-asignatura" formControlName="nombre" placeholder="Ej: Matemáticas" />
+    </div>
+
+    <div class="campo">
+      <label for="responsable-asignatura">Profesor</label>
+      <p-select
+        inputId="responsable-asignatura"
+        formControlName="responsable_id"
+        [options]="responsables()"
+        optionLabel="nombre_completo"
+        optionValue="id"
+        [showClear]="true"
+        placeholder="Sin profesor"
+      />
+    </div>
+
+    @if (errorAsignatura()) {
+      <p-message severity="error" [text]="errorAsignatura()!" />
+    }
+
+    <button pButton type="submit" [loading]="guardandoAsignatura()" [disabled]="guardandoAsignatura()">
+      {{ editandoAsignatura() ? 'Guardar cambios' : 'Crear' }}
+    </button>
   </form>
 </p-dialog>

@@ -40,3 +40,14 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# Secretos / variables de entorno
+.env
+.env.*
+!.env.e2e.example
+
+# Playwright (Fase 6.1 — pruebas E2E)
+/playwright-report
+/test-results
+/blob-report
+/playwright/.cache
