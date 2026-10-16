@@ -51,3 +51,6 @@ Thumbs.db
 /test-results
 /blob-report
 /playwright/.cache
+
+# Caché local del CLI de Supabase (se regenera con "supabase link")
+/supabase/.temp
