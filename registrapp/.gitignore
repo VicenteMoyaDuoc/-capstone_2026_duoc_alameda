@@ -54,3 +54,6 @@ Thumbs.db
 
 # Caché local del CLI de Supabase (se regenera con "supabase link")
 /supabase/.temp
+
+# Certificados HTTPS locales para probar en el celular (se regeneran con mkcert)
+/.certs-local

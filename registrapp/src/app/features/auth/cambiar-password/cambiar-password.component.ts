@@ -53,8 +53,12 @@ export class CambiarPasswordComponent {
     const { error } = await this.supabase.auth.updateUser({ password });
 
     if (error) {
+      console.error('Error al actualizar la contraseña:', error);
       this.cargando.set(false);
-      this.error.set('No se pudo actualizar la contraseña. Intenta nuevamente.');
+      this.error.set(
+        'No pudimos confirmar el cambio de contraseña (puede ser un corte de conexión). ' +
+          'Antes de reintentar, prueba iniciar sesión con la contraseña nueva: si funciona, ya quedó guardada.'
+      );
       return;
     }
 
