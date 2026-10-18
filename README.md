@@ -1,30 +1,45 @@
 <div align="center">
 
-# 📋 RegistrApp
+# RegistrApp
 
 ### Capstone-001D — DUOC UC, sede Alameda
 
 Plataforma web de gestión de asistencia mediante código QR firmado. Sustituye la pasada de lista tradicional en papel por un código QR de vigencia breve: el responsable proyecta el código, la persona lo abre con su cámara y el servidor registra la marca al instante, visible en vivo para el responsable.
 
-![Skills](https://skillicons.dev/icons?i=angular,ts,js,html,css,sass,postgres,supabase,deno,vercel,git,github)
+<p>
+  <img src="https://skillicons.dev/icons?i=angular" title="Angular" alt="Angular" height="40" />
+  <img src="https://skillicons.dev/icons?i=ts" title="TypeScript" alt="TypeScript" height="40" />
+  <img src="https://skillicons.dev/icons?i=js" title="JavaScript" alt="JavaScript" height="40" />
+  <img src="https://skillicons.dev/icons?i=html" title="HTML5" alt="HTML5" height="40" />
+  <img src="https://skillicons.dev/icons?i=css" title="CSS3" alt="CSS3" height="40" />
+  <img src="https://skillicons.dev/icons?i=sass" title="Sass" alt="Sass" height="40" />
+  <img src="https://skillicons.dev/icons?i=postgres" title="PostgreSQL" alt="PostgreSQL" height="40" />
+  <img src="https://skillicons.dev/icons?i=supabase" title="Supabase" alt="Supabase" height="40" />
+  <img src="https://skillicons.dev/icons?i=deno" title="Deno" alt="Deno" height="40" />
+  <img src="https://skillicons.dev/icons?i=vercel" title="Vercel" alt="Vercel" height="40" />
+  <img src="https://skillicons.dev/icons?i=git" title="Git" alt="Git" height="40" />
+  <img src="https://skillicons.dev/icons?i=github" title="GitHub" alt="GitHub" height="40" />
+</p>
+
+<sub>(pasa el cursor sobre cada ícono para ver el nombre de la herramienta)</sub>
 
 </div>
 
 ---
 
-## 📑 Contenido
+## Contenido
 
-- [Tecnologías utilizadas](#-tecnologías-utilizadas)
-- [Demo en vivo](#-demo-en-vivo)
-- [Cómo ejecutar el proyecto localmente](#-cómo-ejecutar-el-proyecto-localmente)
-- [Despliegue](#-despliegue)
-- [Equipo](#-equipo)
-- [Metodología de trabajo](#-metodología-de-trabajo)
-- [Arquitectura de la solución](#-arquitectura-de-la-solución)
+- [Tecnologías utilizadas](#tecnologías-utilizadas)
+- [Demo en vivo](#demo-en-vivo)
+- [Cómo ejecutar el proyecto localmente](#cómo-ejecutar-el-proyecto-localmente)
+- [Despliegue](#despliegue)
+- [Equipo](#equipo)
+- [Metodología de trabajo](#metodología-de-trabajo)
+- [Arquitectura de la solución](#arquitectura-de-la-solución)
 
 ---
 
-## 🧰 Tecnologías utilizadas
+## Tecnologías utilizadas
 
 | Capa | Tecnologías |
 |---|---|
@@ -33,11 +48,11 @@ Plataforma web de gestión de asistencia mediante código QR firmado. Sustituye 
 | **Datos y reportes** | SheetJS (carga masiva CSV/Excel), pdfmake (exportación a PDF) |
 | **Despliegue** | Vercel (frontend) |
 
-## 🌐 Demo en vivo
+## Demo en vivo
 
 > (pendiente — se agrega el enlace de Vercel una vez desplegado)
 
-## 🚀 Cómo ejecutar el proyecto localmente
+## Cómo ejecutar el proyecto localmente
 
 ### Requisitos previos
 
@@ -70,11 +85,11 @@ Plataforma web de gestión de asistencia mediante código QR firmado. Sustituye 
    5. Completar el formulario de la institución: nombre, tipo (**educativa** → cursos y asignaturas, o **corporativa** → departamentos) y el nombre completo del administrador.
    6. Quedarás en el dashboard de administrador de tu propia institución, lista para crear cursos/departamentos, usuarios (responsables y miembros) y empezar a generar sesiones de asistencia por QR.
 
-## 📦 Despliegue
+## Despliegue
 
 El proyecto está pensado para desplegarse en Vercel, apuntando el **Root Directory** a la carpeta `registrapp` (ahí vive el proyecto Angular, no en la raíz del repositorio).
 
-## 👥 Equipo
+## Equipo
 
 | Integrante | Rol |
 |---|---|
@@ -82,11 +97,11 @@ El proyecto está pensado para desplegarse en Vercel, apuntando el **Root Direct
 | Marcos Tapia | Desarrollador |
 | Felipe Antonio Krauss | Docente |
 
-## 🔁 Metodología de trabajo
+## Metodología de trabajo
 
 Scrum, con sprints de dos semanas, planificación por épicas, estimación en puntos de función y control de avance en tablero.
 
-## 🏗️ Arquitectura de la solución
+## Arquitectura de la solución
 
 Arquitectura de tres capas:
 
