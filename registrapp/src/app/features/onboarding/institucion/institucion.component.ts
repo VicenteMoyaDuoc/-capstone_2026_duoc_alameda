@@ -50,7 +50,17 @@ export class OnboardingInstitucionComponent {
       const usuario = this.auth.currentUser();
       await this.router.navigateByUrl(usuario ? this.auth.rutaSegunRol(usuario.rol) : '/login');
     } catch (err) {
-      this.error.set(err instanceof Error ? err.message : 'No se pudo crear la institución.');
+      const mensaje = err instanceof Error ? err.message : 'No se pudo crear la institución.';
+
+      if (mensaje === 'Debes iniciar sesión.') {
+        // La sesión guardada en este navegador ya no es válida (p. ej. la cuenta fue
+        // eliminada). Sin esto, el usuario queda atrapado: esta pantalla cree que hay
+        // sesión, pero el servidor la rechaza siempre. Se limpia y se manda a /login.
+        await this.auth.logout();
+        return;
+      }
+
+      this.error.set(mensaje);
     } finally {
       this.cargando.set(false);
     }

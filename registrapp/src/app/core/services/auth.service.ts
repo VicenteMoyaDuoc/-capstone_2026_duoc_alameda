@@ -39,7 +39,13 @@ export class AuthService {
       throw new Error('Correo o contraseña incorrectos.');
     }
 
-    const usuario = await this.buscarUsuario(data.user.id);
+    let usuario: Usuario | null;
+    try {
+      usuario = await this.buscarUsuario(data.user.id);
+    } catch (err) {
+      console.error('Error al cargar el perfil del usuario:', err);
+      throw new Error('No pudimos verificar tu cuenta. Revisa tu conexión e intenta de nuevo.');
+    }
 
     if (!usuario) {
       this.sinPerfil.set(true);
@@ -103,7 +109,18 @@ export class AuthService {
   }
 
   private async cargarUsuario(authUserId: string): Promise<void> {
-    const usuario = await this.buscarUsuario(authUserId);
+    let usuario: Usuario | null;
+    try {
+      usuario = await this.buscarUsuario(authUserId);
+    } catch (err) {
+      // Error real (red, RLS, etc.), no "esta cuenta no tiene institución": no se debe
+      // mandar a onboarding. Se deja sin sesión para que vuelva a intentar desde /login.
+      console.error('Error al cargar el perfil del usuario:', err);
+      this.currentUser.set(null);
+      this.sinPerfil.set(false);
+      this.cargando.set(false);
+      return;
+    }
 
     if (!usuario) {
       this.sinPerfil.set(true);
@@ -125,11 +142,16 @@ export class AuthService {
     this.cargando.set(false);
   }
 
+  /** Lanza si la consulta falló por un motivo real (red, RLS, etc.); solo devuelve `null`
+   *  cuando Postgres confirma que no existe ninguna fila (PGRST116: "0 rows"). */
   private async buscarUsuario(authUserId: string): Promise<Usuario | null> {
     const { data, error } = await this.supabase.from('usuarios').select('*').eq('id', authUserId).single();
 
-    if (error || !data) {
-      return null;
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
     }
 
     return data as Usuario;
