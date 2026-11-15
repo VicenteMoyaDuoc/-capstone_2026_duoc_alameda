@@ -4,7 +4,7 @@
       <i class="pi pi-bars"></i>
     </button>
     <div class="marca">
-      <span class="marca-icono"><i class="pi pi-qrcode"></i></span>
+      <img class="marca-logo" src="logo-qr-oscuro.svg" alt="" width="36" height="36" />
       <span class="marca-nombre">Registrapp</span>
     </div>
   </header>
@@ -23,7 +23,7 @@
 
   <aside class="sidebar" [class.abierto]="menuAbierto()">
     <div class="marca">
-      <span class="marca-icono"><i class="pi pi-qrcode"></i></span>
+      <img class="marca-logo" src="logo-qr-oscuro.svg" alt="" width="36" height="36" />
       <span class="marca-nombre">Registrapp</span>
     </div>
 
@@ -39,6 +39,12 @@
       </a>
       <a routerLink="usuarios" routerLinkActive="activo" (click)="cerrarMenu()">
         <i class="pi pi-users"></i> Usuarios
+      </a>
+      <a routerLink="solicitudes" routerLinkActive="activo" (click)="cerrarMenu()">
+        <i class="pi pi-inbox"></i> Solicitudes
+        @if (solicitudes.pendientes() > 0) {
+          <span class="insignia-menu">{{ solicitudes.pendientes() }}</span>
+        }
       </a>
       <a routerLink="asistencia" routerLinkActive="activo" (click)="cerrarMenu()">
         <i class="pi pi-wifi"></i> Asistencia en vivo

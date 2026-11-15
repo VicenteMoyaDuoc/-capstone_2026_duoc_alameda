@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { AuthService } from '../../../core/services/auth.service';
 import { hayTokenPendiente } from '../../../core/utils/asistir-pendiente';
+import { glosaDe } from '../../../core/errores/catalogo-errores';
 
 @Component({
   selector: 'app-login',
@@ -54,7 +55,8 @@ export class LoginComponent {
 
       await this.router.navigateByUrl(this.auth.rutaSegunEstado(usuario));
     } catch (err) {
-      this.error.set(err instanceof Error ? err.message : 'Correo o contraseña incorrectos.');
+      // Solo la glosa del catálogo: nunca el mensaje técnico del servidor.
+      this.error.set(glosaDe(err, 'AUTH_CREDENCIALES'));
     } finally {
       this.cargando.set(false);
     }

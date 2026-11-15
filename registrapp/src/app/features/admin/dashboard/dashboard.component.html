@@ -1,93 +1,289 @@
-<h1>Dashboard</h1>
-<p class="subtitulo">Resumen de tu institución</p>
+<div class="dash">
+  <header class="cabecera">
+    <div>
+      <h1>Dashboard</h1>
+      <p class="subtitulo">Resumen de tu institución · últimos 30 días</p>
+    </div>
+    <button type="button" class="boton-recargar" (click)="recargar()" [disabled]="cargando()" aria-label="Actualizar datos">
+      <i class="pi pi-refresh" [class.girando]="cargando()"></i>
+      <span>Actualizar</span>
+    </button>
+  </header>
 
-@if (error()) {
-  <div class="estado-error">
-    <i class="pi pi-exclamation-triangle"></i>
-    <span>{{ error() }}</span>
-  </div>
-} @else {
-  <div class="tarjetas">
-    @if (cargando()) {
-      @for (i of [1, 2, 3, 4, 5]; track i) {
-        <div class="tarjeta">
-          <p-skeleton shape="circle" size="48px" />
-          <div class="datos">
-            <p-skeleton width="3rem" height="1.6rem" />
-            <p-skeleton width="5rem" height="0.9rem" styleClass="mt-1" />
+  @if (error()) {
+    <div class="estado-error" role="alert">
+      <i class="pi pi-exclamation-triangle"></i>
+      <span>{{ error() }}</span>
+    </div>
+  } @else {
+    <div class="grilla">
+      <div class="fila-kpi">
+      <!-- Asistencia: el número principal -->
+      <section class="widget widget--hero" [attr.data-nivel]="nivelGeneral()" aria-label="Asistencia de los últimos 30 días">
+        <h2 class="widget-titulo">Asistencia</h2>
+        <p class="widget-fecha">Últimos 30 días</p>
+        @if (cargando()) {
+          <div class="skel skel--hero"></div>
+        } @else {
+          @if (porcentajeAsistencia30d() !== null) {
+            <p class="hero-numero">{{ porcentajeAsistencia30d() }}<span class="hero-unidad">%</span></p>
+          } @else {
+            <p class="hero-numero hero-numero--vacio">Sin datos</p>
+          }
+
+          <div class="hero-medidor" aria-hidden="true">
+            <span class="hero-relleno" [attr.data-nivel]="nivelGeneral()" [style.width.%]="porcentajeAsistencia30d() ?? 0"></span>
+            <span class="hero-marca-meta" [style.left.%]="meta"></span>
           </div>
-        </div>
-      }
-    } @else {
-      <div class="tarjeta">
-        <span class="icono icono--verde"><i class="pi pi-sitemap"></i></span>
-        <div class="datos">
-          <span class="numero">{{ totalGrupos() }}</span>
-          <span class="etiqueta">{{ terminologia.grupos() }} activos</span>
-        </div>
+
+          <div class="hero-pie">
+            <span class="pastilla" [attr.data-nivel]="nivelGeneral()">
+              @switch (nivelGeneral()) {
+                @case ('bien') { <i class="pi pi-arrow-up"></i> Sobre la meta }
+                @case ('regular') { <i class="pi pi-minus"></i> Cerca de la meta }
+                @case ('bajo') { <i class="pi pi-arrow-down"></i> Bajo la meta }
+                @default { Sin registros }
+              }
+            </span>
+            <span class="hero-meta">Meta {{ meta }}% · {{ totalRegistros() }} registros</span>
+          </div>
+        }
+      </section>
+
+      <!-- KPIs -->
+      <section class="widget widget--kpi">
+        <span class="kpi-icono kpi-icono--verde"><i class="pi pi-sitemap"></i></span>
+        <h2 class="widget-titulo">{{ terminologia.grupos() }} activos</h2>
+        @if (cargando()) { <div class="skel skel--kpi"></div> } @else { <p class="kpi-numero">{{ totalGrupos() }}</p> }
+      </section>
+
+      <section class="widget widget--kpi">
+        <span class="kpi-icono kpi-icono--morado"><i class="pi pi-users"></i></span>
+        <h2 class="widget-titulo">{{ terminologia.miembros() }} activos</h2>
+        @if (cargando()) { <div class="skel skel--kpi"></div> } @else { <p class="kpi-numero">{{ totalMiembros() }}</p> }
+      </section>
+
+      <section class="widget widget--kpi">
+        <span class="kpi-icono kpi-icono--azul"><i class="pi pi-id-card"></i></span>
+        <h2 class="widget-titulo">{{ terminologia.responsables() }}</h2>
+        @if (cargando()) { <div class="skel skel--kpi"></div> } @else { <p class="kpi-numero">{{ totalResponsables() }}</p> }
+      </section>
+
+      <section class="widget widget--kpi">
+        <span class="kpi-icono kpi-icono--rosa"><i class="pi pi-calendar"></i></span>
+        <h2 class="widget-titulo">{{ terminologia.sesiones() }} hoy</h2>
+        @if (cargando()) { <div class="skel skel--kpi"></div> } @else { <p class="kpi-numero">{{ sesionesHoy() }}</p> }
+      </section>
+
       </div>
 
-      <div class="tarjeta">
-        <span class="icono icono--morado"><i class="pi pi-users"></i></span>
-        <div class="datos">
-          <span class="numero">{{ totalMiembros() }}</span>
-          <span class="etiqueta">{{ terminologia.miembros() }} activos</span>
-        </div>
-      </div>
+      <!-- Gráfico de línea: tendencia diaria -->
+      <section class="widget widget--linea">
+        <h2 class="widget-titulo">Tendencia de asistencia</h2>
+        <p class="widget-fecha">% de asistencia en los últimos días con clases</p>
 
-      <div class="tarjeta">
-        <span class="icono icono--azul"><i class="pi pi-id-card"></i></span>
-        <div class="datos">
-          <span class="numero">{{ totalResponsables() }}</span>
-          <span class="etiqueta">{{ terminologia.responsables() }}</span>
-        </div>
-      </div>
+        @if (cargando()) {
+          <div class="skel skel--grafico"></div>
+        } @else if (puntosLinea().length === 0) {
+          <p class="vacio">Aún no hay clases terminadas en los últimos 30 días.</p>
+        } @else {
+          <div class="grafico" role="img" [attr.aria-label]="'Gráfico de línea: asistencia diaria, ' + puntosLinea().length + ' días'">
+            <div class="ejes" aria-hidden="true"><span>100</span><span>50</span><span>0</span></div>
+            <div class="area">
+              <div class="plano" aria-hidden="true">
+                <div class="guias"><i></i><i></i><i></i></div>
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <path class="linea-area" [attr.d]="trazoArea()" />
+                  <path class="linea-trazo" [attr.d]="trazoLinea()" vector-effect="non-scaling-stroke" />
+                </svg>
+              </div>
+              <ul class="columnas">
+                @for (p of puntosLinea(); track p.fecha) {
+                  <li class="columna" tabindex="0" [attr.aria-label]="p.etiqueta + ': ' + p.porcentaje + '% (' + p.asistidas + ' de ' + p.total + ')'">
+                    <span class="carril">
+                      <span class="marca" [style.bottom.%]="p.porcentaje"></span>
+                      <span class="tip" [style.bottom]="'calc(' + p.porcentaje + '% + 14px)'" aria-hidden="true">
+                        <strong>{{ p.etiqueta }}</strong>
+                        {{ p.porcentaje }}% · {{ p.asistidas }}/{{ p.total }}
+                      </span>
+                    </span>
+                    <span class="etq">{{ p.etiqueta }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
 
-      <div class="tarjeta">
-        <span class="icono icono--naranja"><i class="pi pi-percentage"></i></span>
-        <div class="datos">
-          <span class="numero">{{ porcentajeAsistencia30d() !== null ? porcentajeAsistencia30d() + '%' : '—' }}</span>
-          <span class="etiqueta">Asistencia (30 días)</span>
-        </div>
-      </div>
+          <table class="solo-lectores">
+            <caption>Asistencia por día</caption>
+            <thead><tr><th>Fecha</th><th>% asistencia</th><th>Asistidas</th><th>Total</th></tr></thead>
+            <tbody>
+              @for (p of puntosLinea(); track p.fecha) {
+                <tr><td>{{ p.fecha }}</td><td>{{ p.porcentaje }}</td><td>{{ p.asistidas }}</td><td>{{ p.total }}</td></tr>
+              }
+            </tbody>
+          </table>
+        }
+      </section>
 
-      <div class="tarjeta">
-        <span class="icono icono--rosa"><i class="pi pi-calendar"></i></span>
-        <div class="datos">
-          <span class="numero">{{ sesionesHoy() }}</span>
-          <span class="etiqueta">{{ terminologia.sesiones() }} hoy</span>
-        </div>
-      </div>
-    }
-  </div>
+      <!-- Dona: distribución de estados -->
+      <section class="widget widget--dona">
+        <h2 class="widget-titulo">Estado de la asistencia</h2>
+        <p class="widget-fecha">Últimos 30 días</p>
 
-  <h2 class="titulo-tabla">{{ terminologia.grupos() }}</h2>
+        @if (cargando()) {
+          <div class="skel skel--grafico"></div>
+        } @else if (totalRegistros() === 0) {
+          <p class="vacio">Sin registros todavía.</p>
+        } @else {
+          <div class="dist-barra" role="img" [attr.aria-label]="'Distribución de ' + totalRegistros() + ' registros'">
+            @for (s of segmentosDona(); track s.clave) {
+              @if (s.cantidad > 0) {
+                <i [class]="'seg seg--' + s.clave" [style.width.%]="(s.cantidad * 100) / totalRegistros()"></i>
+              }
+            }
+          </div>
 
-  <div class="tabla-card">
-    <p-table [value]="filasGrupos()" [loading]="cargando()" styleClass="p-datatable-sm">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Nombre</th>
-          <th>Responsable</th>
-          <th>{{ terminologia.miembros() }}</th>
-          <th>% Asistencia</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-fila>
-        <tr>
-          <td class="celda-nombre">{{ fila.nombre }}</td>
-          <td>{{ fila.responsable }}</td>
-          <td>{{ fila.miembros }}</td>
-          <td>{{ fila.porcentajeAsistencia !== null ? fila.porcentajeAsistencia + '%' : '—' }}</td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="4" class="vacio">
+          <table class="dist-tabla">
+            <thead>
+              <tr><th>Estado</th><th class="num">Registros</th><th class="num">%</th></tr>
+            </thead>
+            <tbody>
+              @for (s of segmentosDona(); track s.clave) {
+                <tr>
+                  <td><span [class]="'punto punto--' + s.clave"></span>{{ s.etiqueta }}</td>
+                  <td class="num">{{ s.cantidad }}</td>
+                  <td class="num">{{ s.porcentaje }}%</td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr><td>Total</td><td class="num">{{ totalRegistros() }}</td><td class="num">100%</td></tr>
+            </tfoot>
+          </table>
+        }
+      </section>
+
+      <!-- Barras verticales: promedio por día de la semana -->
+      <section class="widget widget--semana">
+        <h2 class="widget-titulo">Asistencia por día de la semana</h2>
+        <p class="widget-fecha">Promedio de los últimos 30 días</p>
+
+        @if (cargando()) {
+          <div class="skel skel--grafico"></div>
+        } @else if (serieSemana().length === 0) {
+          <p class="vacio">Sin datos suficientes.</p>
+        } @else {
+          <div class="grafico grafico--semana" role="img" aria-label="Gráfico de barras: asistencia promedio por día de la semana">
+            <div class="ejes" aria-hidden="true"><span>100</span><span>50</span><span>0</span></div>
+            <div class="area">
+              <div class="plano" aria-hidden="true"><div class="guias"><i></i><i></i><i></i></div></div>
+              <ul class="columnas">
+                @for (d of serieSemana(); track d.etiqueta) {
+                  <li class="columna columna--barra" tabindex="0" [attr.aria-label]="d.etiqueta + ': ' + d.porcentaje + '%'">
+                    <span class="carril">
+                      <span class="barra" [style.height.%]="d.porcentaje"></span>
+                      <span class="tip" [style.bottom]="'calc(' + d.porcentaje + '% + 6px)'" aria-hidden="true">
+                        <strong>{{ d.etiqueta }}</strong>
+                        {{ d.porcentaje }}% · {{ d.total }} registros
+                      </span>
+                    </span>
+                    <span class="etq">{{ d.etiqueta }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+        }
+      </section>
+
+      <!-- Barras horizontales apiladas: composición por curso -->
+      <section class="widget widget--apiladas">
+        <h2 class="widget-titulo">{{ terminologia.grupos() }}: puntual, tardanza y ausente</h2>
+        <p class="widget-fecha">Composición de los últimos 30 días</p>
+
+        @if (cargando()) {
+          <div class="skel skel--grafico"></div>
+        } @else if (composicionGrupos().length === 0) {
+          <p class="vacio">Sin registros todavía.</p>
+        } @else {
+          <ul class="leyenda leyenda--fila">
+            <li><span class="punto punto--puntual"></span><span class="leyenda-nombre">Puntual</span></li>
+            <li><span class="punto punto--tardanza"></span><span class="leyenda-nombre">Tardanza</span></li>
+            <li><span class="punto punto--ausente"></span><span class="leyenda-nombre">Ausente</span></li>
+          </ul>
+
+          <ul class="apiladas">
+            @for (c of composicionGrupos(); track c.id) {
+              <li>
+                <span class="ap-nombre">{{ c.nombre }}</span>
+                <span class="ap-barra" role="img"
+                      [attr.aria-label]="c.nombre + ': ' + c.puntual + ' puntual, ' + c.tardanza + ' tardanza, ' + c.ausente + ' ausente'">
+                  <i class="seg seg--puntual" [style.width.%]="c.pPuntual" [attr.title]="'Puntual: ' + c.puntual"></i>
+                  <i class="seg seg--tardanza" [style.width.%]="c.pTardanza" [attr.title]="'Tardanza: ' + c.tardanza"></i>
+                  <i class="seg seg--ausente" [style.width.%]="c.pAusente" [attr.title]="'Ausente: ' + c.ausente"></i>
+                </span>
+                <span class="ap-valor">{{ c.pAsistencia }}%</span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <!-- Tabla de cursos -->
+      <section class="widget widget--tabla">
+        <h2 class="widget-titulo">{{ terminologia.grupos() }}</h2>
+        <p class="widget-fecha">Asistencia histórica por {{ terminologia.grupos().toLowerCase() }}</p>
+
+        @if (cargando()) {
+          <div class="skel skel--tabla"></div>
+        } @else if (filasGrupos().length === 0) {
+          <p class="vacio">
             Aún no hay {{ terminologia.grupos().toLowerCase() }}. Crea el primero desde "{{ terminologia.grupos() }}".
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-  </div>
-}
+          </p>
+        } @else {
+          <div class="tabla-scroll">
+            <table class="tabla">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th class="col-responsable">Responsable</th>
+                  <th class="col-numero">{{ terminologia.miembros() }}</th>
+                  <th>% Asistencia</th>
+                  <th class="col-estado">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (fila of filasGrupos(); track fila.id) {
+                  <tr>
+                    <td class="celda-nombre">{{ fila.nombre }}</td>
+                    <td class="col-responsable">{{ fila.responsable }}</td>
+                    <td class="col-numero">{{ fila.miembros }}</td>
+                    <td>
+                      <div class="progreso">
+                        <span class="progreso-pista" aria-hidden="true">
+                          <span class="progreso-relleno" [attr.data-nivel]="fila.nivel" [style.width.%]="fila.porcentajeAsistencia ?? 0"></span>
+                        </span>
+                        <span class="progreso-valor">{{ fila.porcentajeAsistencia !== null ? fila.porcentajeAsistencia + '%' : '—' }}</span>
+                      </div>
+                    </td>
+                    <td class="col-estado">
+                      <span class="pastilla" [attr.data-nivel]="fila.nivel">
+                        @switch (fila.nivel) {
+                          @case ('bien') { <i class="pi pi-check-circle"></i> Bien }
+                          @case ('regular') { <i class="pi pi-minus-circle"></i> Regular }
+                          @case ('bajo') { <i class="pi pi-exclamation-circle"></i> Bajo }
+                          @default { <i class="pi pi-circle"></i> Sin datos }
+                        }
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    </div>
+  }
+</div>

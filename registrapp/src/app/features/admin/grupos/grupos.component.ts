@@ -11,6 +11,7 @@ import { SupabaseService } from '../../../core/services/supabase.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { TerminologiaService } from '../../../core/services/terminologia.service';
 import { Usuario } from '../../../core/models/models';
+import { glosaDe } from '../../../core/errores/catalogo-errores';
 
 const FILAS_POR_PAGINA = 10;
 
@@ -126,7 +127,7 @@ export class GruposComponent {
     this.guardando.set(false);
 
     if (error) {
-      this.error.set(this.mensajeError(error.message));
+      this.error.set(glosaDe(error));
       return;
     }
 
@@ -178,16 +179,6 @@ export class GruposComponent {
     return this.conteoMiembros()[grupoId] ?? 0;
   }
 
-  private mensajeError(mensaje: string): string {
-    if (mensaje.includes('uq_grupo_nombre_por_institucion')) {
-      return `Ya existe ${this.terminologia.grupo().toLowerCase()} con ese nombre.`;
-    }
-    if (mensaje.toLowerCase().includes('responsable')) {
-      return mensaje;
-    }
-    return 'No se pudo guardar: ' + mensaje;
-  }
-
   private async cargarResponsables(): Promise<void> {
     const institucionId = this.auth.currentUser()?.institucion_id;
     if (!institucionId) return;
@@ -229,7 +220,7 @@ export class GruposComponent {
     ]);
 
     if (error) {
-      this.error.set('No se pudieron cargar los grupos: ' + error.message);
+      this.error.set(glosaDe(error));
     }
 
     const conteo: Record<string, number> = {};
@@ -296,7 +287,7 @@ export class GruposComponent {
     this.guardandoAsignatura.set(false);
 
     if (error) {
-      this.errorAsignatura.set(this.mensajeErrorAsignatura(error.message));
+      this.errorAsignatura.set(glosaDe(error));
       return;
     }
 
@@ -345,16 +336,6 @@ export class GruposComponent {
 
     this.toast.add({ severity: 'success', summary: 'Asignatura archivada' });
     await this.cargarAsignaturas(grupo.id);
-  }
-
-  private mensajeErrorAsignatura(mensaje: string): string {
-    if (mensaje.includes('uq_asignatura_nombre_por_grupo')) {
-      return `Ya existe una asignatura con ese nombre en ${this.terminologia.grupo().toLowerCase()}.`;
-    }
-    if (mensaje.toLowerCase().includes('responsable')) {
-      return mensaje;
-    }
-    return 'No se pudo guardar: ' + mensaje;
   }
 
   private async cargarAsignaturas(grupoId: string): Promise<void> {

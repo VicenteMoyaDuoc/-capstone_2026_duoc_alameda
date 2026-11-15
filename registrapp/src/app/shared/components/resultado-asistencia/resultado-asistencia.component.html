@@ -21,6 +21,21 @@
         @if (r.grupoNombre) {
           <p class="grupo">{{ r.grupoNombre }}</p>
         }
+        @if (r.mapa; as m) {
+          <div class="mapa-resultado">
+            @if (m.distanciaM !== null) {
+              @if (estaDentro(m)) {
+                <span class="etiqueta etiqueta--ok"><i class="pi pi-map-marker"></i> Estás dentro del rango</span>
+              } @else {
+                <span class="etiqueta etiqueta--fuera"><i class="pi pi-exclamation-triangle"></i> Estás fuera del rango</span>
+              }
+            }
+            <app-mapa-ubicacion [lat]="m.sede.lat" [lng]="m.sede.lng" [radio]="m.radioM" [yo]="m.alumno" [alto]="220" [soloLectura]="true" />
+            @if (m.distanciaM !== null) {
+              <p class="distancia">{{ textoDistancia(m) }}</p>
+            }
+          </div>
+        }
       </div>
     }
   }
@@ -31,6 +46,21 @@
         <i class="pi pi-times-circle"></i>
         <h1>No se pudo registrar tu asistencia</h1>
         <p>{{ r.mensaje }}</p>
+        @if (r.mapa; as m) {
+          <div class="mapa-resultado">
+            @if (m.distanciaM !== null) {
+              @if (estaDentro(m)) {
+                <span class="etiqueta etiqueta--ok"><i class="pi pi-map-marker"></i> Estás dentro del rango</span>
+              } @else {
+                <span class="etiqueta etiqueta--fuera"><i class="pi pi-exclamation-triangle"></i> Estás fuera del rango</span>
+              }
+            }
+            <app-mapa-ubicacion [lat]="m.sede.lat" [lng]="m.sede.lng" [radio]="m.radioM" [yo]="m.alumno" [alto]="220" [soloLectura]="true" />
+            @if (m.distanciaM !== null) {
+              <p class="distancia">{{ textoDistancia(m) }}</p>
+            }
+          </div>
+        }
       </div>
     }
   }

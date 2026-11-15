@@ -5,7 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { QRCodeModule } from 'angularx-qrcode';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { MarcoMovilComponent } from '../../../shared/components/marco-movil/marco-movil.component';
 import { ListaAsistenciaComponent, type ModoListaAsistencia } from '../../../shared/components/lista-asistencia/lista-asistencia.component';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -16,6 +16,7 @@ import {
   type SesionAsistencia,
   type RespuestaSesionActiva
 } from '../../../core/services/asistencia.service';
+import { pestanasResponsable } from '../pestanas';
 import { ahoraServidor, calcularDesfaseServidor, formatearDuracion } from '../../../core/utils/reloj-servidor';
 
 /**
@@ -49,7 +50,7 @@ const SESIONES_HISTORIAL = 5;
 @Component({
   selector: 'app-panel',
   standalone: true,
-  imports: [FormsModule, SelectModule, ButtonModule, MessageModule, QRCodeModule, NavbarComponent, ListaAsistenciaComponent],
+  imports: [FormsModule, SelectModule, ButtonModule, MessageModule, QRCodeModule, MarcoMovilComponent, ListaAsistenciaComponent],
   templateUrl: './panel.component.html',
   styleUrl: './panel.component.scss'
 })
@@ -99,6 +100,12 @@ export class PanelComponent {
     this.cargarOpciones();
     this.intervalId = setInterval(() => this.tick(), 1000);
     this.destroyRef.onDestroy(() => clearInterval(this.intervalId));
+  }
+
+  readonly pestanas = computed(() => pestanasResponsable());
+
+  get primerNombre(): string {
+    return this.auth.currentUser()?.nombre_completo.split(' ')[0] ?? '';
   }
 
   get qrUrl(): string {

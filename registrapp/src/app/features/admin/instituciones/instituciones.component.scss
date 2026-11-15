@@ -1,23 +1,45 @@
-h1 {
-  font-size: 26px;
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
 }
 
-.subtitulo {
-  margin: 6px 0 28px;
-  color: var(--rp-text-muted);
-  font-size: 14.5px;
-}
-
-.form-institucion {
+.institucion {
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  max-width: 420px;
-  background: var(--rp-surface);
-  border: 1px solid var(--rp-border);
-  box-shadow: var(--rp-shadow-card);
-  padding: 28px;
-  border-radius: var(--rp-radius-lg);
+  gap: 12px;
+}
+
+// Dos paneles lado a lado en pantallas anchas; uno debajo del otro en pantallas angostas.
+.paneles {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr);
+  gap: 12px;
+  align-items: stretch; // los dos paneles tienen la misma altura
+}
+
+.paneles .panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.paneles .panel-cuerpo {
+  flex: 1;
+}
+
+.campos {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  // los tres parámetros de asistencia se reparten el ancho disponible
+  &--rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 20px 24px;
+    align-items: start;
+  }
 }
 
 .campo {
@@ -26,14 +48,14 @@ h1 {
   gap: 6px;
 
   label {
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 600;
-    color: var(--rp-text-muted);
   }
 
   input,
   ::ng-deep .p-select,
-  ::ng-deep .p-inputnumber {
+  ::ng-deep .p-inputnumber,
+  ::ng-deep .p-inputnumber-input {
     width: 100%;
   }
 
@@ -44,20 +66,45 @@ h1 {
 
   .ayuda {
     font-size: 12px;
+    line-height: 1.4;
     color: var(--rp-text-muted);
   }
 }
 
-h2 {
-  font-size: 15px;
-  margin: 8px 0 -4px;
-  padding-top: 14px;
-  border-top: 1px solid var(--rp-border);
+.campos > .ayuda {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--rp-text-muted);
 }
 
-@media (max-width: 600px) {
-  .form-institucion {
-    padding: 20px;
-    max-width: 100%;
+.campo--ancho {
+  grid-column: 1 / -1;
+}
+
+.acciones-geo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 1000px) {
+  .paneles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .encabezado {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+
+    ::ng-deep .subtitulo {
+      margin-bottom: 14px;
+    }
+
+    button {
+      width: 100%;
+    }
   }
 }

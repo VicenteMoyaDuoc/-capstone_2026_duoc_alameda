@@ -7,6 +7,7 @@ import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { AdministracionService } from '../../../core/services/administracion.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { glosaDe } from '../../../core/errores/catalogo-errores';
 
 @Component({
   selector: 'app-onboarding-institucion',
@@ -50,7 +51,7 @@ export class OnboardingInstitucionComponent {
       const usuario = this.auth.currentUser();
       await this.router.navigateByUrl(usuario ? this.auth.rutaSegunRol(usuario.rol) : '/login');
     } catch (err) {
-      const mensaje = err instanceof Error ? err.message : 'No se pudo crear la institución.';
+      const mensaje = glosaDe(err);
 
       if (mensaje === 'Debes iniciar sesión.') {
         // La sesión guardada en este navegador ya no es válida (p. ej. la cuenta fue

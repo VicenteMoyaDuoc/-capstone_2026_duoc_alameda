@@ -1,0 +1,42 @@
+<div class="marco">
+  <header class="cabecera">
+    <div class="interior">
+      <div class="barra">
+        <div class="marca">
+          <img src="logo-qr-oscuro.svg" alt="" width="32" height="32" />
+          <span class="marca-nombre">registr<b>App</b></span>
+        </div>
+        <div class="usuario">
+          @if (auth.currentUser(); as usuario) {
+            <span class="avatar" aria-hidden="true">{{ iniciales(usuario.nombre_completo) }}</span>
+          }
+          <button type="button" class="salir" aria-label="Cerrar sesión" title="Cerrar sesión" (click)="cerrarSesion()">
+            <i class="pi pi-sign-out"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="saludo">
+        <ng-content select="[saludo]" />
+      </div>
+    </div>
+  </header>
+
+  <main class="contenido">
+    <ng-content />
+  </main>
+
+  <nav class="pestanas" aria-label="Navegación">
+    <div class="pestanas-interior">
+      @for (p of pestanas(); track p.ruta) {
+        <a [routerLink]="p.ruta" routerLinkActive="activa" [routerLinkActiveOptions]="{ exact: p.exacta ?? false }">
+          <i class="pi" [class]="'pi ' + p.icono" aria-hidden="true"></i>
+          <span>{{ p.texto }}</span>
+          @if (p.insignia) {
+            <b class="insignia">{{ p.insignia }}</b>
+          }
+        </a>
+      }
+    </div>
+  </nav>
+</div>

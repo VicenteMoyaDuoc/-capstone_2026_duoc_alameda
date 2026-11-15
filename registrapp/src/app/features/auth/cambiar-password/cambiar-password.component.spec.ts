@@ -81,7 +81,9 @@ describe('CambiarPasswordComponent', () => {
 
     await componente.guardar();
 
-    expect(componente.error()).toBe('No se pudo actualizar la contraseña. Intenta nuevamente.');
+    // El componente explica a propósito que el cambio pudo quedar guardado aunque falle la confirmación.
+    expect(componente.error()).toContain('No pudimos confirmar el cambio de contraseña');
+    expect(componente.error()).toContain('prueba iniciar sesión con la contraseña nueva');
     expect(navigateSpy).not.toHaveBeenCalled();
   });
 

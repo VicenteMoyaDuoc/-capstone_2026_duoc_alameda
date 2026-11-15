@@ -9,10 +9,10 @@
   --rp-border: #e7e8e2;
   --rp-text: #16171c;
   --rp-text-muted: #6f7168;
-  --rp-radius-lg: 22px;
-  --rp-radius-md: 16px;
-  --rp-radius-sm: 10px;
-  --rp-shadow-card: 0 1px 2px rgba(22, 23, 28, 0.04), 0 8px 24px rgba(22, 23, 28, 0.06);
+  --rp-radius-lg: 2px;
+  --rp-radius-md: 2px;
+  --rp-radius-sm: 2px;
+  --rp-shadow-card: none;
 }
 
 * {
@@ -40,4 +40,149 @@ h4 {
   font-weight: 700;
   letter-spacing: -0.01em;
   margin: 0;
+}
+
+// ───────────── Panel de administración: cabeceras y paneles cuadrados reutilizables ─────────────
+
+.contenido main h1 {
+  font-size: 24px;
+}
+
+.contenido main .subtitulo {
+  margin: 6px 0 24px;
+  font-size: 14px;
+}
+
+.panel {
+  background: var(--rp-surface);
+  border: 1px solid var(--rp-border);
+  border-radius: 2px;
+  min-width: 0;
+}
+
+.panel-cab {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--rp-border);
+
+  h2 {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    color: var(--rp-text-muted);
+  }
+}
+
+.panel-cuerpo {
+  padding: 20px;
+}
+
+@media (max-width: 480px) {
+  .panel-cab,
+  .panel-cuerpo {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+// ───────────── PrimeNG: ajustes de estilo ─────────────
+
+.p-datatable .p-datatable-table-container {
+  overflow-x: auto;
+}
+
+.p-paginator .p-paginator-page,
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last {
+  border-radius: 2px;
+}
+
+.p-tabs {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.p-tabs .p-tablist-content {
+  overflow-x: auto;
+}
+
+.p-tabs .p-tab.p-tab-active {
+  color: var(--rp-text);
+}
+
+// Las tablas no parten el texto en varias líneas: en pantallas angostas se desplazan dentro de su panel.
+.p-datatable .p-datatable-thead > tr > th,
+.p-datatable .p-datatable-tbody > tr > td {
+  white-space: nowrap;
+}
+
+// ───────────── Pantallas del alumno: tarjetas y pastillas compartidas ─────────────
+
+.m-tarjeta {
+  background: var(--rp-surface);
+  border: 1px solid var(--rp-border);
+  border-radius: 2px;
+  min-width: 0;
+}
+
+.m-tarjeta-cab {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--rp-border);
+
+  h2 {
+    margin: 0;
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+
+  a,
+  span {
+    font-size: 12.5px;
+    color: var(--rp-text-muted);
+  }
+
+  a {
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--rp-text);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.m-pastilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #e4f5e4;
+  color: #0b7a0b;
+
+  &.tardanza {
+    background: #fdf1d3;
+    color: #8a5600;
+  }
+
+  &.ausente {
+    background: #fbe3e1;
+    color: #b3261e;
+  }
 }

@@ -3,12 +3,15 @@ import { ButtonModule } from 'primeng/button';
 import { MessageModule } from 'primeng/message';
 import { BrowserQRCodeReader } from '@zxing/browser';
 import type { IScannerControls } from '@zxing/browser';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { MarcoMovilComponent } from '../../../shared/components/marco-movil/marco-movil.component';
 import {
   ResultadoAsistenciaComponent,
+  mapaDeError,
+  mapaDeRegistro,
   type ResultadoAsistenciaVista
 } from '../../../shared/components/resultado-asistencia/resultado-asistencia.component';
 import { AsistenciaService, AsistenciaError } from '../../../core/services/asistencia.service';
+import { TerminologiaService } from '../../../core/services/terminologia.service';
 import { formatearHora } from '../../../core/utils/reloj-servidor';
 import { extraerTokenDeUrlPropia } from '../../../core/utils/token-qr';
 
@@ -18,12 +21,13 @@ type Estado = 'inicial' | 'escaneando' | 'permiso_denegado' | 'mostrando_resulta
 @Component({
   selector: 'app-escanear',
   standalone: true,
-  imports: [NavbarComponent, ResultadoAsistenciaComponent, ButtonModule, MessageModule],
+  imports: [MarcoMovilComponent, ResultadoAsistenciaComponent, ButtonModule, MessageModule],
   templateUrl: './escanear.component.html',
   styleUrl: './escanear.component.scss'
 })
 export class EscanearComponent {
   private readonly asistenciaService = inject(AsistenciaService);
+  readonly terminologia = inject(TerminologiaService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly video = viewChild<ElementRef<HTMLVideoElement>>('video');
@@ -84,11 +88,12 @@ export class EscanearComponent {
         estado: registro.estado,
         horaTexto: formatearHora(registro.registrado_en),
         grupoNombre: registro.grupo?.nombre,
-        asignaturaNombre: registro.asignatura?.nombre
+        asignaturaNombre: registro.asignatura?.nombre,
+        mapa: mapaDeRegistro(registro)
       });
     } catch (error) {
       const mensaje = error instanceof AsistenciaError ? error.message : 'Ocurrió un error. Intenta nuevamente.';
-      this.resultado.set({ tipo: 'error', mensaje });
+      this.resultado.set({ tipo: 'error', mensaje, mapa: error instanceof AsistenciaError ? mapaDeError(error) : undefined });
     }
   }
 }

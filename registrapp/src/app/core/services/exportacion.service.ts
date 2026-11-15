@@ -2,13 +2,16 @@ import { Injectable } from '@angular/core';
 import * as XLSX from 'xlsx';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import type { FilaDetalleAsistencia, FilaResumenGrupo, FilaResumenPersona } from '../utils/metricas-asistencia';
+import { nombreAsignatura, type FilaDetalleAsistencia, type FilaResumenAsignatura, type FilaResumenGrupo, type FilaResumenPersona } from '../utils/metricas-asistencia';
 
 (pdfMake as unknown as { vfs: unknown }).vfs = pdfFonts;
 
 export interface MetaReporte {
   institucionNombre: string;
   grupoNombre: string;
+  asignaturaNombre: string;
+  /** false en empresas: no hay asignaturas, así que se omite de las exportaciones */
+  conAsignaturas: boolean;
   desde: string;
   hasta: string;
   generadoPor: string;
@@ -58,16 +61,38 @@ const ESTADO_TEXTO: Record<string, string> = { puntual: 'Puntual', tardanza: 'Ta
 export class ExportacionService {
   exportarExcel(
     resumenGrupo: FilaResumenGrupo[],
+    resumenAsignatura: FilaResumenAsignatura[],
     resumenPersona: FilaResumenPersona[],
     detalle: FilaDetalleAsistencia[],
     meta: MetaReporte
   ): void {
     const libro = XLSX.utils.book_new();
 
+    // Solo en instituciones educativas: las empresas no tienen asignaturas.
+    const bloqueAsignatura: (string | number)[][] = meta.conAsignaturas
+      ? [
+          [],
+          ['Resumen por asignatura'],
+          ['Grupo', 'Asignatura', 'Clases', 'Miembros', 'Asistidas', 'Tardanzas', '% Asistencia', '% Tardanza', '% Ausentismo'],
+          ...resumenAsignatura.map((r) => [
+            sanitizarTexto(r.grupo),
+            sanitizarTexto(r.asignatura),
+            r.clases,
+            r.miembrosTotal,
+            r.asistidas,
+            r.tardanzas,
+            formatearPorcentaje(r.porcentajeAsistencia),
+            formatearPorcentaje(r.porcentajeTardanza),
+            formatearPorcentaje(r.porcentajeAusentismo)
+          ])
+        ]
+      : [];
+
     const filasResumen: (string | number)[][] = [
       ['Reporte de asistencia'],
       ['Institución', sanitizarTexto(meta.institucionNombre)],
       ['Grupo', sanitizarTexto(meta.grupoNombre)],
+      ...(meta.conAsignaturas ? [['Asignatura', sanitizarTexto(meta.asignaturaNombre)]] : []),
       ['Desde', formatearFechaCorta(meta.desde)],
       ['Hasta', formatearFechaCorta(meta.hasta)],
       ['Generado por', sanitizarTexto(meta.generadoPor)],
@@ -85,6 +110,7 @@ export class ExportacionService {
         formatearPorcentaje(r.porcentajeTardanza),
         formatearPorcentaje(r.porcentajeAusentismo)
       ]),
+      ...bloqueAsignatura,
       [],
       ['Resumen por persona'],
       ['Grupo', 'Nombre', 'Sesiones', 'Asistidas', 'Tardanzas', '% Asistencia', '% Tardanza', '% Ausentismo'],
@@ -104,11 +130,12 @@ export class ExportacionService {
     XLSX.utils.book_append_sheet(libro, hojaResumen, 'Resumen');
 
     const filasDetalle: (string | number)[][] = [
-      ['Fecha', 'Hora sesión', 'Grupo', 'Nombre', 'Estado', 'Hora de registro'],
+      ['Fecha', 'Hora sesión', 'Grupo', ...(meta.conAsignaturas ? ['Asignatura'] : []), 'Nombre', 'Estado', 'Hora de registro'],
       ...detalle.map((d) => [
         formatearFechaCorta(d.fecha),
         formatearHora(d.inicio),
         sanitizarTexto(d.grupo),
+        ...(meta.conAsignaturas ? [sanitizarTexto(nombreAsignatura(d))] : []),
         sanitizarTexto(d.nombre_completo),
         ESTADO_TEXTO[d.estado] ?? d.estado,
         formatearHora(d.registrado_en)
@@ -123,6 +150,7 @@ export class ExportacionService {
 
   exportarPdf(
     resumenGrupo: FilaResumenGrupo[],
+    resumenAsignatura: FilaResumenAsignatura[],
     resumenPersona: FilaResumenPersona[],
     detalle: FilaDetalleAsistencia[],
     meta: MetaReporte
@@ -143,6 +171,26 @@ export class ExportacionService {
             String(r.tardanzas),
             formatearPorcentaje(r.porcentajeAsistencia),
             formatearPorcentaje(r.porcentajeTardanza)
+          ])
+        ]
+      },
+      layout: 'lightHorizontalLines'
+    };
+
+    const tablaResumenAsignatura = {
+      table: {
+        headerRows: 1,
+        widths: anchoCompleto(7),
+        body: [
+          ['Grupo', 'Asignatura', 'Clases', 'Miembros', 'Asistidas', 'Tardanzas', '% Asist.'],
+          ...resumenAsignatura.map((r) => [
+            r.grupo,
+            r.asignatura,
+            String(r.clases),
+            String(r.miembrosTotal),
+            String(r.asistidas),
+            String(r.tardanzas),
+            formatearPorcentaje(r.porcentajeAsistencia)
           ])
         ]
       },
@@ -171,12 +219,13 @@ export class ExportacionService {
     const tablaDetalle = {
       table: {
         headerRows: 1,
-        widths: anchoCompleto(5),
+        widths: anchoCompleto(meta.conAsignaturas ? 6 : 5),
         body: [
-          ['Fecha', 'Grupo', 'Nombre', 'Estado', 'Hora registro'],
+          ['Fecha', 'Grupo', ...(meta.conAsignaturas ? ['Asignatura'] : []), 'Nombre', 'Estado', 'Hora registro'],
           ...detalle.map((d) => [
             formatearFechaCorta(d.fecha),
             d.grupo,
+            ...(meta.conAsignaturas ? [nombreAsignatura(d)] : []),
             d.nombre_completo,
             ESTADO_TEXTO[d.estado] ?? d.estado,
             formatearHora(d.registrado_en)
@@ -204,6 +253,7 @@ export class ExportacionService {
         { text: 'Reporte de asistencia', style: 'titulo' },
         { text: `Institución: ${meta.institucionNombre}`, margin: [0, 8, 0, 0] as [number, number, number, number] },
         { text: `Grupo: ${meta.grupoNombre}` },
+        ...(meta.conAsignaturas ? [{ text: `Asignatura: ${meta.asignaturaNombre}` }] : []),
         { text: `Período: ${formatearFechaCorta(meta.desde)} a ${formatearFechaCorta(meta.hasta)}` },
         {
           text: `Generado por ${meta.generadoPor} el ${formatearFechaHoraCorta(meta.generadoEn)}`,
@@ -211,6 +261,12 @@ export class ExportacionService {
         },
         { text: 'Resumen por grupo', style: 'subtitulo' },
         tablaResumenGrupo,
+        ...(meta.conAsignaturas
+          ? [
+              { text: 'Resumen por asignatura', style: 'subtitulo', margin: [0, 16, 0, 4] as [number, number, number, number] },
+              tablaResumenAsignatura
+            ]
+          : []),
         { text: 'Resumen por persona', style: 'subtitulo', margin: [0, 16, 0, 4] as [number, number, number, number] },
         tablaResumenPersona,
         { text: 'Detalle', style: 'subtitulo', margin: [0, 16, 0, 4] as [number, number, number, number] },

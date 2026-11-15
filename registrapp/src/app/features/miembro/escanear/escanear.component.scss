@@ -1,44 +1,132 @@
-.pagina {
-  min-height: 100vh;
-  background: var(--rp-bg);
+h1 {
+  margin: 8px 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
 }
 
-.escanear {
-  padding: 32px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  text-align: center;
+.bajada {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #a4a6b3;
 }
 
 .intro {
   display: flex;
   flex-direction: column;
+  gap: 20px;
+  padding: 20px 16px;
+}
+
+.visor-demo {
+  align-self: center;
+  position: relative;
+  width: 132px;
+  height: 132px;
+  display: flex;
   align-items: center;
-  gap: 14px;
-  margin-top: 40px;
+  justify-content: center;
+  background: var(--rp-ink);
+  color: var(--rp-accent);
 
   i {
-    font-size: 56px;
-    color: var(--p-primary-color, #5c8a1c);
+    font-size: 64px;
+  }
+}
+
+.pasos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14.5px;
+    line-height: 1.45;
   }
 
-  p {
-    max-width: 320px;
-    color: var(--rp-text-muted, #666);
+  span {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--rp-bg);
+    border: 1px solid var(--rp-border);
+    font-size: 12.5px;
+    font-weight: 700;
   }
+}
+
+:host ::ng-deep .boton-ancho {
+  width: 100%;
+}
+
+.escaneando {
+  padding: 16px;
+}
+
+.marco-video {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #000;
+  overflow: hidden;
 }
 
 .video-preview {
   width: 100%;
-  max-width: 420px;
-  aspect-ratio: 1 / 1;
+  height: 100%;
   object-fit: cover;
-  border-radius: var(--rp-radius-lg, 16px);
-  background: #000;
+  display: block;
+}
+
+// esquinas del visor
+.esquina {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border: 0 solid var(--rp-accent);
+
+  &.e1 {
+    top: 14px;
+    left: 14px;
+    border-top-width: 4px;
+    border-left-width: 4px;
+  }
+
+  &.e2 {
+    top: 14px;
+    right: 14px;
+    border-top-width: 4px;
+    border-right-width: 4px;
+  }
+
+  &.e3 {
+    bottom: 14px;
+    left: 14px;
+    border-bottom-width: 4px;
+    border-left-width: 4px;
+  }
+
+  &.e4 {
+    bottom: 14px;
+    right: 14px;
+    border-bottom-width: 4px;
+    border-right-width: 4px;
+  }
 }
 
 .ayuda {
-  color: var(--rp-text-muted, #666);
+  margin: 14px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--rp-text-muted);
 }

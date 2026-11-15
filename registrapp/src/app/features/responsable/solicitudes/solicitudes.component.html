@@ -1,0 +1,140 @@
+<app-marco-movil [pestanas]="pestanas()">
+  <div saludo>
+    <p class="hola">Hola, {{ primerNombre }}</p>
+    <h1>Solicitudes</h1>
+    <p class="bajada">Pide una asignatura o escribe un mensaje al administrador. Siempre sobre un {{ terminologia.grupo().toLowerCase() }} que elijas.</p>
+  </div>
+
+  <section class="m-tarjeta">
+    <header class="m-tarjeta-cab">
+      <h2>Nueva solicitud</h2>
+      <span>Para el administrador</span>
+    </header>
+
+    <form class="formulario" (ngSubmit)="enviar()">
+      @if (tiposDisponibles().length > 1) {
+        <div class="selector-tipo" role="group" aria-label="Tipo de solicitud">
+          @for (t of tiposDisponibles(); track t.id) {
+            <button type="button" [class.activo]="tipoActual() === t.id" [attr.aria-pressed]="tipoActual() === t.id" (click)="elegirTipo(t.id)">
+              {{ t.nombre }}
+            </button>
+          }
+        </div>
+      }
+
+      <div class="campo">
+        <label for="sol-curso">{{ terminologia.grupo() }}</label>
+        <p-select
+          inputId="sol-curso"
+          [options]="grupos()"
+          optionLabel="nombre"
+          optionValue="id"
+          [ngModel]="grupoId()"
+          (ngModelChange)="grupoId.set($event)"
+          [ngModelOptions]="{ standalone: true }"
+          [placeholder]="'Elige ' + terminologia.grupo().toLowerCase()"
+          styleClass="ancho"
+        />
+        @if (grupos().length > 1) {
+          <span class="ayuda">Tienes {{ grupos().length }} {{ terminologia.grupos().toLowerCase() }}: elige sobre cuál es.</span>
+        }
+      </div>
+
+      @if (tipoActual() === 'asignatura') {
+        <div class="campo">
+          <label for="sol-nombre">Nombre de la asignatura</label>
+          <input
+            pInputText
+            id="sol-nombre"
+            maxlength="80"
+            placeholder="Ej: Educación Física"
+            [ngModel]="nombre()"
+            (ngModelChange)="nombre.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+          />
+          <span class="ayuda">Si la aprueban, quedarás como su profesor responsable.</span>
+        </div>
+      } @else {
+        <div class="campo">
+          <label for="sol-nombre">Asunto</label>
+          <input
+            pInputText
+            id="sol-nombre"
+            maxlength="80"
+            placeholder="Ej: Cambio de sala"
+            [ngModel]="nombre()"
+            (ngModelChange)="nombre.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        </div>
+
+        <div class="campo">
+          <label for="sol-detalle">Mensaje</label>
+          <textarea
+            id="sol-detalle"
+            rows="4"
+            maxlength="600"
+            placeholder="Cuéntale al administrador qué necesitas."
+            [ngModel]="detalle()"
+            (ngModelChange)="detalle.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+          ></textarea>
+          <span class="ayuda">{{ detalle().length }}/600 · La respuesta aparecerá abajo, en "Mis solicitudes".</span>
+        </div>
+      }
+
+      @if (mensaje(); as m) {
+        <p-message [severity]="m.tipo" [text]="m.texto" />
+      }
+
+      <button pButton type="submit" icon="pi pi-send" [label]="tipoActual() === 'asignatura' ? 'Enviar solicitud' : 'Enviar mensaje'" [loading]="enviando()" [disabled]="!puedeEnviar()"></button>
+    </form>
+  </section>
+
+  <section class="m-tarjeta">
+    <header class="m-tarjeta-cab">
+      <h2>Mis solicitudes</h2>
+      <span>{{ pendientes() }} pendiente{{ pendientes() === 1 ? '' : 's' }}</span>
+    </header>
+
+    @if (cargando()) {
+      <div class="skel"></div>
+    } @else if (lista().length === 0) {
+      <p class="vacio">Todavía no has enviado solicitudes.</p>
+    } @else {
+      <ul class="lista">
+        @for (s of lista(); track s.id) {
+          <li [attr.data-estado]="s.estado">
+            <div class="fila">
+              <div class="info">
+                <span class="tipo">{{ s.tipo === 'asignatura' ? 'Asignatura' : 'Mensaje' }}</span>
+                <strong>{{ s.nombre }}</strong>
+                <span class="meta">{{ nombreGrupo(s.grupo_id) }} · {{ fecha(s.created_at) }}</span>
+              </div>
+
+              <div class="lado">
+                <span class="m-pastilla" [class.tardanza]="s.estado === 'pendiente'" [class.ausente]="s.estado === 'rechazada'">
+                  {{ etiquetaEstado(s) }}
+                </span>
+                @if (s.estado === 'pendiente') {
+                  <button type="button" class="cancelar" (click)="cancelar(s)">Cancelar</button>
+                }
+              </div>
+            </div>
+
+            @if (s.detalle) {
+              <p class="detalle">{{ s.detalle }}</p>
+            }
+
+            @if (s.respuesta) {
+              <div class="respuesta">
+                <strong>Respuesta del administrador</strong>
+                <p>{{ s.respuesta }}</p>
+              </div>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</app-marco-movil>
