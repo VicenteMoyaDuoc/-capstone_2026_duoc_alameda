@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { TerminologiaService } from '../../../core/services/terminologia.service';
+import { SolicitudesService } from '../../../core/services/solicitudes.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -13,7 +14,12 @@ import { TerminologiaService } from '../../../core/services/terminologia.service
 export class AdminLayoutComponent {
   readonly auth = inject(AuthService);
   readonly terminologia = inject(TerminologiaService);
+  readonly solicitudes = inject(SolicitudesService);
   readonly menuAbierto = signal(false);
+
+  constructor() {
+    this.solicitudes.actualizarPendientes();
+  }
 
   iniciales(nombreCompleto: string): string {
     return nombreCompleto

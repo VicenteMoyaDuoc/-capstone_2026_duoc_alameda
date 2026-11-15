@@ -14,6 +14,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { AdministracionService } from '../../../core/services/administracion.service';
 import { TerminologiaService } from '../../../core/services/terminologia.service';
 import { Grupo, Rol, Usuario } from '../../../core/models/models';
+import { glosaDe } from '../../../core/errores/catalogo-errores';
 
 const FILAS_POR_PAGINA = 10;
 
@@ -180,7 +181,7 @@ export class UsuariosComponent {
       this.toast.add({ severity: 'success', summary: 'Usuario creado', detail: nombre_completo });
       await this.cargarUsuarios(0);
     } catch (err) {
-      this.errorCrear.set(err instanceof Error ? err.message : 'No se pudo crear el usuario.');
+      this.errorCrear.set(glosaDe(err));
     } finally {
       this.guardandoCrear.set(false);
     }
@@ -210,7 +211,7 @@ export class UsuariosComponent {
       this.toast.add({ severity: 'success', summary: 'Cambios guardados' });
       await this.cargarUsuarios(0);
     } catch (err) {
-      this.errorEditar.set(err instanceof Error ? err.message : 'No se pudo guardar el cambio.');
+      this.errorEditar.set(glosaDe(err));
     } finally {
       this.guardandoEditar.set(false);
     }
@@ -234,7 +235,7 @@ export class UsuariosComponent {
       this.toast.add({ severity: 'success', summary: 'Usuario desactivado' });
       await this.cargarUsuarios(0);
     } catch (err) {
-      this.toast.add({ severity: 'error', summary: 'No se pudo desactivar', detail: err instanceof Error ? err.message : '' });
+      this.toast.add({ severity: 'error', summary: 'No se pudo desactivar', detail: glosaDe(err) });
     }
   }
 
@@ -251,7 +252,7 @@ export class UsuariosComponent {
           this.toast.add({ severity: 'success', summary: 'Usuario reactivado' });
           await this.cargarUsuarios(0);
         } catch (err) {
-          this.toast.add({ severity: 'error', summary: 'No se pudo reactivar', detail: err instanceof Error ? err.message : '' });
+          this.toast.add({ severity: 'error', summary: 'No se pudo reactivar', detail: glosaDe(err) });
         }
       }
     });
@@ -269,7 +270,7 @@ export class UsuariosComponent {
           const resultado = await this.administracion.resetearPassword(usuario.id);
           this.mostrarPasswordTemporal(resultado.password_temporal);
         } catch (err) {
-          this.toast.add({ severity: 'error', summary: 'No se pudo resetear', detail: err instanceof Error ? err.message : '' });
+          this.toast.add({ severity: 'error', summary: 'No se pudo resetear', detail: glosaDe(err) });
         }
       }
     });
@@ -452,7 +453,7 @@ export class UsuariosComponent {
           correo: fila.correo,
           nombre_completo: fila.nombre_completo,
           estado: 'error',
-          detalle: err instanceof Error ? err.message : 'No se pudo crear.'
+          detalle: glosaDe(err)
         });
       }
       this.filasProcesadas.set(this.filasProcesadas() + 1);

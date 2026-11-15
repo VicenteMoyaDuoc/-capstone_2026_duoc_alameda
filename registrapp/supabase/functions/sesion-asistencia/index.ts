@@ -4,10 +4,22 @@ import { manejarPreflight } from '../_shared/cors.ts';
 import { jsonRespuesta, errorRespuesta } from '../_shared/respuesta.ts';
 import { clienteAdmin, obtenerUsuarioLlamador, registrarAuditoria, type UsuarioLlamador } from '../_shared/supabase-admin.ts';
 import { firmarToken, generarJti, type PayloadToken } from '../_shared/qr.ts';
+import { mensajeGeo, resolverGeoDeSesion, type ConfigGeoInstitucion, type Ubicacion } from '../_shared/geo.ts';
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 
+const esquemaUbicacion = z.object({
+  lat: z.number().min(-90).max(90),
+  lng: z.number().min(-180).max(180),
+  precision: z.number().min(0).max(1_000_000)
+});
+
 const esquemaEntrada = z.discriminatedUnion('accion', [
-  z.object({ accion: z.literal('iniciar'), grupo_id: z.string().uuid(), asignatura_id: z.string().uuid().nullable().optional() }),
+  z.object({
+    accion: z.literal('iniciar'),
+    grupo_id: z.string().uuid(),
+    asignatura_id: z.string().uuid().nullable().optional(),
+    ubicacion: esquemaUbicacion.optional()
+  }),
   z.object({ accion: z.literal('renovar'), sesion_id: z.string().uuid() }),
   z.object({ accion: z.literal('cerrar'), sesion_id: z.string().uuid() })
 ]);
@@ -63,6 +75,7 @@ async function manejarIniciar(
   llamador: UsuarioLlamador,
   grupoId: string,
   asignaturaId: string | null,
+  ubicacion: Ubicacion | undefined,
   origin: string | null
 ): Promise<Response> {
   const { data: grupo } = await admin
@@ -98,7 +111,7 @@ async function manejarIniciar(
 
   const { data: institucion } = await admin
     .from('instituciones')
-    .select('tolerancia_min, duracion_sesion_min, qr_ttl_seg')
+    .select('tolerancia_min, duracion_sesion_min, qr_ttl_seg, geo_modo, sede_lat, sede_lng, radio_proximidad_m, radio_exacto_m')
     .eq('id', llamador.institucionId)
     .single();
 
@@ -122,6 +135,17 @@ async function manejarIniciar(
     return await respuestaSesionYaAbierta(sesionExistente, origin);
   }
 
+  // Regla de ubicación de esta clase. En modo "exacta" el centro es donde está el profesor ahora.
+  const geo = resolverGeoDeSesion(institucion as unknown as ConfigGeoInstitucion, ubicacion);
+  if (!geo.ok) {
+    const modo = (institucion['geo_modo'] as ConfigGeoInstitucion['geo_modo']) ?? 'off';
+    return jsonRespuesta(
+      geo.code === 'UBICACION_REQUERIDA' ? 422 : 403,
+      { ok: false, code: geo.code, message: mensajeGeo(geo.code, modo, 'profesor'), data: { modo } },
+      origin
+    );
+  }
+
   const inicio = new Date();
   const expiraEn = new Date(inicio.getTime() + (institucion['duracion_sesion_min'] as number) * 60_000);
 
@@ -135,7 +159,8 @@ async function manejarIniciar(
       inicio: inicio.toISOString(),
       expira_en: expiraEn.toISOString(),
       tolerancia_min: institucion['tolerancia_min'],
-      qr_ttl_seg: institucion['qr_ttl_seg']
+      qr_ttl_seg: institucion['qr_ttl_seg'],
+      ...geo.sesion
     })
     .select('*')
     .single();
@@ -152,7 +177,8 @@ async function manejarIniciar(
   await registrarAuditoria(admin, 'sesion_iniciada', llamador.institucionId, llamador.usuarioId, {
     sesion_id: nuevaSesion['id'],
     grupo_id: grupoId,
-    asignatura_id: asignaturaId
+    asignatura_id: asignaturaId,
+    geo_modo: geo.sesion.geo_modo
   });
 
   const { token, tokenExpiraEn } = await generarTokenParaSesion(nuevaSesion['id'] as string, nuevaSesion['qr_ttl_seg'] as number);
@@ -267,7 +293,7 @@ Deno.serve(async (req) => {
 
   switch (parseo.data.accion) {
     case 'iniciar':
-      return manejarIniciar(admin, llamador, parseo.data.grupo_id, parseo.data.asignatura_id ?? null, origin);
+      return manejarIniciar(admin, llamador, parseo.data.grupo_id, parseo.data.asignatura_id ?? null, parseo.data.ubicacion, origin);
     case 'renovar':
       return manejarRenovar(admin, llamador, parseo.data.sesion_id, origin);
     case 'cerrar':

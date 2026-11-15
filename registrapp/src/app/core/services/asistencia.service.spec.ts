@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { SupabaseService } from './supabase.service';
 import { AsistenciaError, AsistenciaService, MENSAJE_GENERICO } from './asistencia.service';
+import { UbicacionError, UbicacionService, type UbicacionLeida } from './ubicacion.service';
 
 function errorConCuerpo(cuerpo: unknown): { context: { json: () => Promise<unknown> } } {
   return { context: { json: () => Promise.resolve(cuerpo) } };
@@ -21,6 +22,27 @@ function configurar(invokeResultado: { data: unknown; error: unknown }): Asisten
 
   return TestBed.inject(AsistenciaService);
 }
+
+/** Servicio cuyo servidor responde, en orden, las respuestas dadas; y cuyo GPS entrega `ubicacion` (o falla). */
+function configurarConGps(respuestas: { data: unknown; error: unknown }[], gps: () => Promise<UbicacionLeida>) {
+  const invoke = jasmine.createSpy('invoke');
+  invoke.and.returnValues(...respuestas.map((r) => Promise.resolve(r)));
+  const obtener = jasmine.createSpy('obtener').and.callFake(gps);
+
+  TestBed.configureTestingModule({
+    providers: [
+      { provide: SupabaseService, useValue: { client: { functions: { invoke } } } },
+      { provide: UbicacionService, useValue: { obtener } }
+    ]
+  });
+
+  return { servicio: TestBed.inject(AsistenciaService), invoke, obtener };
+}
+
+const exigeUbicacion = (modo: string) => ({
+  data: null,
+  error: errorConCuerpo({ ok: false, code: 'UBICACION_REQUERIDA', message: 'Debes permitir el acceso a tu ubicación para continuar.', data: { modo } })
+});
 
 describe('AsistenciaService — mapeo de errores a mensajes', () => {
   describe('registrarAsistencia', () => {
@@ -114,6 +136,67 @@ describe('AsistenciaService — mapeo de errores a mensajes', () => {
         expect((error as AsistenciaError).code).toBe('SESION_YA_ABIERTA');
         expect((error as AsistenciaError).data).toEqual(datosSesionExistente);
       }
+    });
+  });
+
+  describe('verificación de ubicación', () => {
+    const gpsOk = (): Promise<UbicacionLeida> => Promise.resolve({ lat: -33.4489, lng: -70.67, precision: 12 });
+    const registro = { data: { ok: true, data: { estado: 'puntual', registrado_en: '2026-11-14T12:00:00.000Z', grupo: null, asignatura: null, sesion: { id: 's1' } } }, error: null };
+
+    it('si la clase no exige ubicación, nunca se pide el GPS', async () => {
+      const { servicio, invoke, obtener } = configurarConGps([registro], gpsOk);
+
+      await servicio.registrarAsistencia('token-largo-de-prueba');
+
+      expect(obtener).not.toHaveBeenCalled();
+      expect(invoke).toHaveBeenCalledTimes(1);
+      expect(invoke.calls.argsFor(0)[1]).toEqual({ body: { token: 'token-largo-de-prueba' } });
+    });
+
+    it('si el servidor pide ubicación, lee el GPS según el modo y repite el registro con ella', async () => {
+      const { servicio, invoke, obtener } = configurarConGps([exigeUbicacion('exacta'), registro], gpsOk);
+
+      const resultado = await servicio.registrarAsistencia('token-largo-de-prueba');
+
+      expect(resultado.estado).toBe('puntual');
+      expect(obtener).toHaveBeenCalledOnceWith('exacta');
+      expect(invoke).toHaveBeenCalledTimes(2);
+      expect(invoke.calls.argsFor(1)[1]).toEqual({ body: { token: 'token-largo-de-prueba', ubicacion: { lat: -33.4489, lng: -70.67, precision: 12 } } });
+    });
+
+    it('si el permiso de ubicación se deniega, muestra ese mensaje y no repite la llamada', async () => {
+      const denegado = () => Promise.reject(new UbicacionError('UBICACION_DENEGADA', 'Debes permitir el acceso a tu ubicación para continuar.'));
+      const { servicio, invoke } = configurarConGps([exigeUbicacion('proximidad')], denegado);
+
+      await expectAsync(servicio.registrarAsistencia('token-largo-de-prueba')).toBeRejectedWith(
+        jasmine.objectContaining({ code: 'UBICACION_DENEGADA', message: 'Debes permitir el acceso a tu ubicación para continuar.' })
+      );
+      expect(invoke).toHaveBeenCalledTimes(1);
+    });
+
+    it('un rechazo por estar fuera de rango llega con su mensaje y no vuelve a pedir el GPS', async () => {
+      const fuera = {
+        data: null,
+        error: errorConCuerpo({ ok: false, code: 'FUERA_DE_RANGO', message: 'Parece que no estás en la sede.', data: { modo: 'proximidad' } })
+      };
+      const { servicio, obtener } = configurarConGps([exigeUbicacion('proximidad'), fuera], gpsOk);
+
+      await expectAsync(servicio.registrarAsistencia('token-largo-de-prueba')).toBeRejectedWith(
+        jasmine.objectContaining({ code: 'FUERA_DE_RANGO', message: 'Parece que no estás en la sede.' })
+      );
+      expect(obtener).toHaveBeenCalledTimes(1);
+    });
+
+    it('el profesor, al iniciar la clase en modo exacta, envía su ubicación', async () => {
+      const sesion = { data: { ok: true, data: { sesion: { id: 's1' }, token: 't', servidor_ahora: 1, token_expira_en: 2 } }, error: null };
+      const { servicio, invoke } = configurarConGps([exigeUbicacion('exacta'), sesion], gpsOk);
+
+      await servicio.iniciarSesion('g1', 'a1');
+
+      expect(invoke.calls.argsFor(0)[1]).toEqual({ body: { accion: 'iniciar', grupo_id: 'g1', asignatura_id: 'a1' } });
+      expect(invoke.calls.argsFor(1)[1]).toEqual({
+        body: { accion: 'iniciar', grupo_id: 'g1', asignatura_id: 'a1', ubicacion: { lat: -33.4489, lng: -70.67, precision: 12 } }
+      });
     });
   });
 });

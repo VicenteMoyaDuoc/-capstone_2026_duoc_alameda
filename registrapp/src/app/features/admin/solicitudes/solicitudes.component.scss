@@ -1,0 +1,226 @@
+:host ::ng-deep .mensaje {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.selector-vista {
+  display: flex;
+  margin-bottom: 12px;
+  overflow-x: auto;
+
+  button {
+    flex-shrink: 0;
+    padding: 9px 16px;
+    margin-left: -1px;
+    border: 1px solid var(--rp-border);
+    border-radius: 0;
+    background: var(--rp-surface);
+    color: var(--rp-text-muted);
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:first-of-type {
+      margin-left: 0;
+    }
+
+    &:hover {
+      color: var(--rp-text);
+      background: var(--rp-bg);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--rp-text);
+      outline-offset: -2px;
+      position: relative;
+    }
+
+    &.activa {
+      background: var(--rp-ink);
+      border-color: var(--rp-ink);
+      color: #fff;
+    }
+  }
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    padding: 16px 20px;
+    border-left: 4px solid #fab219;
+
+    & + li {
+      border-top: 1px solid var(--rp-border);
+    }
+
+    &[data-estado='aprobada'],
+    &[data-estado='respondida'] {
+      border-left-color: #0ca30c;
+    }
+
+    &[data-estado='rechazada'] {
+      border-left-color: #d03b3b;
+    }
+  }
+
+  .cabecera-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+
+    .tipo {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--rp-text-muted);
+    }
+
+    strong {
+      font-size: 15px;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: var(--rp-text-muted);
+    }
+  }
+
+  .detalle {
+    margin: 10px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-line;
+  }
+
+  // zona de respuesta, justo debajo de la solicitud
+  .responder {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: var(--rp-bg);
+    border: 1px solid var(--rp-border);
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 9px 11px;
+      border: 1px solid var(--rp-border);
+      border-radius: 2px;
+      background: var(--rp-surface);
+      font: inherit;
+      font-size: 14px;
+      resize: vertical;
+
+      &:focus {
+        outline: 2px solid var(--rp-text);
+        outline-offset: -1px;
+      }
+    }
+
+    .acciones {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 10px;
+    }
+  }
+
+  .respuesta {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--rp-bg);
+    border-left: 3px solid var(--rp-ink);
+
+    strong {
+      display: block;
+      font-size: 12px;
+      color: var(--rp-text-muted);
+    }
+
+    p {
+      margin: 4px 0 0;
+      font-size: 14px;
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+  }
+}
+
+.pastilla {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  background: #e4f5e4;
+  color: #0b7a0b;
+
+  &[data-estado='rechazada'] {
+    background: #fbe3e1;
+    color: #b3261e;
+  }
+}
+
+.vacio {
+  margin: 0;
+  padding: 36px 16px;
+  text-align: center;
+  font-size: 14.5px;
+  color: var(--rp-text-muted);
+}
+
+.skel {
+  height: 120px;
+  background: linear-gradient(90deg, #eceee6 25%, #f7f8f3 50%, #eceee6 75%);
+  background-size: 200% 100%;
+  animation: brillo 1.4s ease-in-out infinite;
+}
+
+@keyframes brillo {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .lista li {
+    padding: 14px 16px;
+  }
+
+  .lista .cabecera-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .lista .responder .acciones {
+    justify-content: stretch;
+
+    ::ng-deep .p-button {
+      flex: 1;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
+  }
+}

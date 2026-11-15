@@ -35,7 +35,7 @@
   background: var(--rp-surface);
   border: 1px solid var(--rp-border);
   box-shadow: var(--rp-shadow-card);
-  border-radius: var(--rp-radius-lg);
+  border-radius: 2px;
   padding: 8px;
   overflow: hidden;
 
@@ -63,7 +63,7 @@
   display: inline-flex;
   align-items: center;
   padding: 4px 12px;
-  border-radius: 999px;
+  border-radius: 2px;
   background: #eaf9d9;
   color: #5c8a1c;
   font-size: 13px;
@@ -152,5 +152,11 @@
     button {
       width: 100%;
     }
+  }
+}
+
+@media (max-width: 560px) {
+  .filtros .busqueda {
+    max-width: 100%;
   }
 }

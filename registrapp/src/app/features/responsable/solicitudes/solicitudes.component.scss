@@ -1,0 +1,234 @@
+.hola {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #a4a6b3;
+}
+
+h1 {
+  margin: 2px 0 0;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+.bajada {
+  margin: 6px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #a4a6b3;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.selector-tipo {
+  display: flex;
+
+  button {
+    flex: 1;
+    margin-left: -1px;
+    padding: 10px 8px;
+    border: 1px solid var(--rp-border);
+    border-radius: 0;
+    background: var(--rp-surface);
+    color: var(--rp-text-muted);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:first-child {
+      margin-left: 0;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--rp-text);
+      outline-offset: -2px;
+    }
+
+    &.activo {
+      background: var(--rp-ink);
+      border-color: var(--rp-ink);
+      color: #fff;
+    }
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  input,
+  textarea {
+    width: 100%;
+  }
+
+  textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--rp-border);
+    border-radius: 2px;
+    font: inherit;
+    font-size: 14.5px;
+    resize: vertical;
+
+    &:focus {
+      outline: 2px solid var(--rp-text);
+      outline-offset: -1px;
+    }
+  }
+
+  .ayuda {
+    font-size: 12px;
+    color: var(--rp-text-muted);
+  }
+}
+
+:host ::ng-deep .ancho {
+  width: 100%;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    padding: 13px 16px;
+    border-left: 4px solid #fab219;
+
+    & + li {
+      border-top: 1px solid var(--rp-border);
+    }
+
+    &[data-estado='aprobada'],
+    &[data-estado='respondida'] {
+      border-left-color: #0ca30c;
+    }
+
+    &[data-estado='rechazada'] {
+      border-left-color: #d03b3b;
+    }
+  }
+
+  .fila {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+
+    .tipo {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--rp-text-muted);
+    }
+
+    strong {
+      font-size: 14.5px;
+    }
+
+    .meta {
+      font-size: 12.5px;
+      color: var(--rp-text-muted);
+    }
+  }
+
+  .lado {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .detalle {
+    margin: 8px 0 0;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--rp-text-muted);
+    white-space: pre-line;
+  }
+
+  // lo que contesta el administrador
+  .respuesta {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--rp-bg);
+    border-left: 3px solid var(--rp-ink);
+
+    strong {
+      display: block;
+      font-size: 12px;
+      color: var(--rp-text-muted);
+    }
+
+    p {
+      margin: 4px 0 0;
+      font-size: 14px;
+      line-height: 1.45;
+      white-space: pre-line;
+    }
+  }
+
+  .cancelar {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--rp-text-muted);
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--rp-text);
+    }
+  }
+}
+
+.vacio {
+  margin: 0;
+  padding: 26px 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--rp-text-muted);
+}
+
+.skel {
+  height: 90px;
+  background: linear-gradient(90deg, #eceee6 25%, #f7f8f3 50%, #eceee6 75%);
+  background-size: 200% 100%;
+  animation: brillo 1.4s ease-in-out infinite;
+}
+
+@keyframes brillo {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
+  }
+}

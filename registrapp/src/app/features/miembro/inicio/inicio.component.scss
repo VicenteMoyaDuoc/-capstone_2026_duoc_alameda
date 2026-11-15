@@ -1,54 +1,205 @@
-.pagina {
-  min-height: 100vh;
-  background: var(--rp-bg);
+// Saludo (dentro de la cabecera oscura)
+.hola {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #a4a6b3;
 }
 
-.inicio {
-  padding: 32px 40px;
-  max-width: 560px;
-
-  h1 {
-    font-size: 26px;
-    margin: 0 0 8px;
-  }
-
-  .grupo {
-    margin: 0 0 20px;
-    color: var(--rp-text-muted);
-    font-size: 14.5px;
-  }
+h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #fff;
 }
 
-.acciones {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.tarjeta-accion {
-  display: flex;
+.grupo {
+  display: inline-flex;
   align-items: center;
-  gap: 14px;
-  padding: 18px 20px;
-  background: var(--rp-surface, #fff);
-  border: 1px solid var(--rp-border, #e5e5e5);
-  border-radius: var(--rp-radius-lg, 16px);
-  text-decoration: none;
-  color: inherit;
-  font-weight: 600;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 5px 10px;
+  background: var(--rp-ink-soft);
+  border: 1px solid var(--rp-ink-border);
+  font-size: 13px;
+  color: #c9cbd6;
 
   i {
-    font-size: 22px;
-    color: var(--p-primary-color, #5c8a1c);
+    color: var(--rp-accent);
+    font-size: 12px;
   }
 
-  &:hover {
-    background: var(--rp-bg);
+  strong {
+    color: #fff;
+    font-weight: 600;
   }
 }
 
-@media (max-width: 600px) {
-  .inicio {
-    padding: 20px 16px;
+// Tarjeta de asistencia
+.cuerpo {
+  padding: 16px;
+}
+
+.cifra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  strong {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+
+    small {
+      margin-left: 2px;
+      font-size: 0.45em;
+      font-weight: 600;
+      color: var(--rp-text-muted);
+    }
+
+    &[data-nivel='bueno'] {
+      color: #0b7a0b;
+    }
+
+    &[data-nivel='regular'] {
+      color: #8a5600;
+    }
+
+    &[data-nivel='bajo'] {
+      color: #b3261e;
+    }
+  }
+}
+
+.medidor {
+  position: relative;
+  height: 8px;
+  margin-top: 16px;
+  background: #e9eae4;
+
+  i {
+    display: block;
+    height: 100%;
+    background: #b9bbb1;
+
+    &[data-nivel='bueno'] {
+      background: #0ca30c;
+    }
+
+    &[data-nivel='regular'] {
+      background: #fab219;
+    }
+
+    &[data-nivel='bajo'] {
+      background: #d03b3b;
+    }
+  }
+
+  // marca de la meta
+  b {
+    position: absolute;
+    top: -4px;
+    width: 2px;
+    height: 16px;
+    margin-left: -1px;
+    background: var(--rp-text);
+  }
+}
+
+.conteos {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--rp-border);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  text-align: center;
+
+  li + li {
+    border-left: 1px solid var(--rp-border);
+  }
+
+  strong {
+    display: block;
+    font-size: 22px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  span {
+    font-size: 12.5px;
+    color: var(--rp-text-muted);
+  }
+}
+
+.vacio {
+  margin: 0;
+  padding: 8px 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--rp-text-muted);
+}
+
+// Últimos registros
+.registros {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+
+    & + li {
+      border-top: 1px solid var(--rp-border);
+    }
+  }
+
+  .dia {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+
+    strong {
+      font-size: 14.5px;
+      text-transform: capitalize;
+    }
+
+    span {
+      font-size: 12.5px;
+      color: var(--rp-text-muted);
+    }
+  }
+}
+
+.skel {
+  background: linear-gradient(90deg, #eceee6 25%, #f7f8f3 50%, #eceee6 75%);
+  background-size: 200% 100%;
+  animation: brillo 1.4s ease-in-out infinite;
+
+  &--cifra {
+    height: 96px;
+  }
+
+  &--lista {
+    height: 120px;
+  }
+}
+
+@keyframes brillo {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
   }
 }

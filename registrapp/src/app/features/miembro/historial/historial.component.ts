@@ -1,14 +1,16 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { MarcoMovilComponent } from '../../../shared/components/marco-movil/marco-movil.component';
 import { SupabaseService } from '../../../core/services/supabase.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { TerminologiaService } from '../../../core/services/terminologia.service';
-import { calcularMetricas, type FilaDetalleAsistencia } from '../../../core/utils/metricas-asistencia';
+import { calcularMetricas, type EstadoAsistencia, type FilaDetalleAsistencia } from '../../../core/utils/metricas-asistencia';
+
+type Filtro = 'todos' | EstadoAsistencia;
 
 @Component({
   selector: 'app-historial',
   standalone: true,
-  imports: [NavbarComponent],
+  imports: [MarcoMovilComponent],
   templateUrl: './historial.component.html',
   styleUrl: './historial.component.scss'
 })
@@ -19,9 +21,23 @@ export class HistorialComponent {
 
   readonly cargando = signal(true);
   readonly filas = signal<FilaDetalleAsistencia[]>([]);
+  readonly filtro = signal<Filtro>('todos');
 
   readonly metricas = computed(() => calcularMetricas(this.filas()));
-  readonly filasOrdenadas = computed(() => [...this.filas()].sort((a, b) => b.inicio.localeCompare(a.inicio)));
+  readonly ausencias = computed(() => this.filas().filter((f) => f.estado === 'ausente').length);
+  readonly filasOrdenadas = computed(() => {
+    const filtro = this.filtro();
+    return [...this.filas()]
+      .filter((f) => filtro === 'todos' || f.estado === filtro)
+      .sort((a, b) => b.inicio.localeCompare(a.inicio));
+  });
+
+  readonly filtros: { id: Filtro; nombre: string }[] = [
+    { id: 'todos', nombre: 'Todos' },
+    { id: 'puntual', nombre: 'A tiempo' },
+    { id: 'tardanza', nombre: 'Tardanzas' },
+    { id: 'ausente', nombre: 'Ausencias' }
+  ];
 
   constructor() {
     this.cargar();
@@ -30,8 +46,8 @@ export class HistorialComponent {
   /** fila.fecha es una fecha pura ('yyyy-MM-dd', ya en America/Santiago según la vista); no pasar por
    *  Date/timeZone acá, porque un string sin hora se interpreta como medianoche UTC y se corre un día. */
   formatearFecha(fecha: string): string {
-    const [anio, mes, dia] = fecha.split('-');
-    return `${dia}-${mes}-${anio}`;
+    const [anio, mes, dia] = fecha.split('-').map(Number);
+    return new Date(anio, mes - 1, dia).toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).replace('.', '');
   }
 
   formatearHora(iso: string): string {

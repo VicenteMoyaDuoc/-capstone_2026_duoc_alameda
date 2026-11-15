@@ -1,23 +1,72 @@
-<div class="pagina">
-  <app-navbar titulo="Registrapp" />
+<app-marco-movil>
+  <div saludo>
+    <p class="hola">Hola,</p>
+    <h1>{{ primerNombre }}</h1>
+    <p class="grupo">
+      <i class="pi pi-users" aria-hidden="true"></i>
+      {{ terminologia.grupo() }}: <strong>{{ nombreGrupo() ?? 'Sin asignar' }}</strong>
+    </p>
+  </div>
 
-  <main class="inicio">
-    @if (!cargando() && usuario; as u) {
-      <h1>Hola, {{ u.nombre_completo }}</h1>
-      <p class="grupo">
-        {{ terminologia.grupo() }}: <strong>{{ nombreGrupo() ?? 'Sin asignar' }}</strong>
-      </p>
+  <section class="m-tarjeta asistencia">
+    <header class="m-tarjeta-cab">
+      <h2>Tu asistencia</h2>
+      <span>Meta {{ meta }}%</span>
+    </header>
 
-      <div class="acciones">
-        <a routerLink="/miembro/escanear" class="tarjeta-accion">
-          <i class="pi pi-qrcode"></i>
-          <span>Escanear código QR</span>
-        </a>
-        <a routerLink="/miembro/historial" class="tarjeta-accion">
-          <i class="pi pi-calendar"></i>
-          <span>Mi historial</span>
-        </a>
+    @if (cargando()) {
+      <div class="cuerpo"><div class="skel skel--cifra"></div></div>
+    } @else if (metricas().porcentajeAsistencia === null) {
+      <div class="cuerpo">
+        <p class="vacio">Todavía no tienes {{ terminologia.sesiones().toLowerCase() }} registradas.</p>
+      </div>
+    } @else {
+      <div class="cuerpo">
+        <div class="cifra">
+          <strong [attr.data-nivel]="nivel()">{{ metricas().porcentajeAsistencia }}<small>%</small></strong>
+          <span class="m-pastilla" [class.tardanza]="nivel() === 'regular'" [class.ausente]="nivel() === 'bajo'">
+            {{ nivel() === 'bueno' ? 'Muy bien' : nivel() === 'regular' ? 'Puedes mejorar' : 'Atención' }}
+          </span>
+        </div>
+
+        <div class="medidor" aria-hidden="true">
+          <i [attr.data-nivel]="nivel()" [style.width.%]="metricas().porcentajeAsistencia"></i>
+          <b [style.left.%]="meta"></b>
+        </div>
+
+        <ul class="conteos">
+          <li><strong>{{ metricas().asistidas }}</strong><span>Presentes</span></li>
+          <li><strong>{{ metricas().tardanzas }}</strong><span>Tardanzas</span></li>
+          <li><strong>{{ ausencias() }}</strong><span>Ausencias</span></li>
+        </ul>
       </div>
     }
-  </main>
-</div>
+  </section>
+
+  <section class="m-tarjeta">
+    <header class="m-tarjeta-cab">
+      <h2>Últimos registros</h2>
+      <a routerLink="/miembro/historial">Ver todo</a>
+    </header>
+
+    @if (cargando()) {
+      <div class="cuerpo"><div class="skel skel--lista"></div></div>
+    } @else if (ultimos().length === 0) {
+      <div class="cuerpo"><p class="vacio">Aquí aparecerán tus registros de asistencia.</p></div>
+    } @else {
+      <ul class="registros">
+        @for (f of ultimos(); track f.sesion_id) {
+          <li>
+            <div class="dia">
+              <strong>{{ fechaCorta(f.fecha) }}</strong>
+              <span>{{ f.asignatura ?? terminologia.sesion() }}{{ f.registrado_en ? ' · ' + hora(f.registrado_en) : '' }}</span>
+            </div>
+            <span class="m-pastilla" [class.tardanza]="f.estado === 'tardanza'" [class.ausente]="f.estado === 'ausente'">
+              {{ f.estado === 'puntual' ? 'A tiempo' : f.estado === 'tardanza' ? 'Tardanza' : 'Ausente' }}
+            </span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</app-marco-movil>

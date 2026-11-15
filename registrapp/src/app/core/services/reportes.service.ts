@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import type { FilaDetalleAsistencia } from '../utils/metricas-asistencia';
+import { aErrorApp } from '../errores/catalogo-errores';
 
 export interface FiltrosReporte {
   grupoId: string | null;
+  asignaturaId: string | null;
   usuarioId: string | null;
   desde: string;
   hasta: string;
@@ -25,6 +27,7 @@ export class ReportesService {
       .lte('fecha', filtros.hasta);
 
     if (filtros.grupoId) q = q.eq('grupo_id', filtros.grupoId);
+    if (filtros.asignaturaId) q = q.eq('asignatura_id', filtros.asignaturaId);
     if (filtros.usuarioId) q = q.eq('usuario_id', filtros.usuarioId);
     return q;
   }
@@ -44,7 +47,7 @@ export class ReportesService {
         .order('fecha', { ascending: true })
         .range(desde, desde + TAMANO_PAGINA - 1);
 
-      if (error) throw new Error('No se pudieron cargar los datos: ' + error.message);
+      if (error) throw aErrorApp(error);
 
       const lote = (data as FilaDetalleAsistencia[]) ?? [];
       todas.push(...lote);

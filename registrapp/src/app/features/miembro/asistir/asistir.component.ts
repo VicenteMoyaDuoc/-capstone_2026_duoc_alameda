@@ -6,7 +6,7 @@ import { esperarAuthListo } from '../../../core/guards/esperar-auth';
 import { guardarTokenPendiente, tomarTokenPendiente } from '../../../core/utils/asistir-pendiente';
 import { formatearHora } from '../../../core/utils/reloj-servidor';
 import { extraerTokenDeHash } from '../../../core/utils/token-qr';
-import { ResultadoAsistenciaComponent, type ResultadoAsistenciaVista } from '../../../shared/components/resultado-asistencia/resultado-asistencia.component';
+import { ResultadoAsistenciaComponent, mapaDeError, mapaDeRegistro, type ResultadoAsistenciaVista } from '../../../shared/components/resultado-asistencia/resultado-asistencia.component';
 
 /** Fase 3.4 — Vía A: el celular abre esta ruta al leer el QR con la cámara nativa. */
 @Component({
@@ -57,11 +57,12 @@ export class AsistirComponent {
         estado: registro.estado,
         horaTexto: formatearHora(registro.registrado_en),
         grupoNombre: registro.grupo?.nombre,
-        asignaturaNombre: registro.asignatura?.nombre
+        asignaturaNombre: registro.asignatura?.nombre,
+        mapa: mapaDeRegistro(registro)
       });
     } catch (error) {
       const mensaje = error instanceof AsistenciaError ? error.message : 'Ocurrió un error. Intenta nuevamente.';
-      this.resultado.set({ tipo: 'error', mensaje });
+      this.resultado.set({ tipo: 'error', mensaje, mapa: error instanceof AsistenciaError ? mapaDeError(error) : undefined });
     }
   }
 

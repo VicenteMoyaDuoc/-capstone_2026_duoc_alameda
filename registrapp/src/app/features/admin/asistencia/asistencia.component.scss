@@ -1,17 +1,6 @@
+// la cabecera (h1 y subtítulo) usa el estilo global del panel
 .asistencia {
-  padding: 24px 32px;
-  max-width: 720px;
-
-  h1 {
-    font-size: 24px;
-    margin: 0 0 4px;
-  }
-
-  .subtitulo {
-    margin: 0 0 20px;
-    color: var(--rp-text-muted, #666);
-    font-size: 14.5px;
-  }
+  min-width: 0;
 }
 
 .cargando {
@@ -22,7 +11,12 @@
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 24px;
+  align-items: flex-end;
+  background: var(--rp-surface);
+  border: 1px solid var(--rp-border);
+  border-radius: 2px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
 }
 
 .filtro {
@@ -43,9 +37,9 @@
 .sesion-card {
   background: var(--rp-surface, #fff);
   border: 1px solid var(--rp-border, #e5e5e5);
-  border-radius: var(--rp-radius-lg, 16px);
+  border-radius: 2px;
   padding: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 
   header {
     display: flex;
@@ -62,7 +56,7 @@
       font-size: 12.5px;
       font-weight: 600;
       padding: 3px 10px;
-      border-radius: 999px;
+      border-radius: 2px;
       background: #ececec;
       color: #777;
 
@@ -74,8 +68,14 @@
   }
 }
 
-@media (max-width: 700px) {
-  .asistencia {
-    padding: 20px 16px;
+@media (max-width: 560px) {
+  .filtros {
+    flex-direction: column;
+    align-items: stretch;
+
+    ::ng-deep .p-select,
+    ::ng-deep .p-datepicker {
+      width: 100%;
+    }
   }
 }

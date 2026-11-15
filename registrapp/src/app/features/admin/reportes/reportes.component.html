@@ -1,6 +1,6 @@
 <div class="reportes">
   <h1>Reportes</h1>
-  <p class="subtitulo">Asistencia por {{ terminologia.grupo().toLowerCase() }} y por persona</p>
+  <p class="subtitulo">{{ terminologia.esEducativa() ? 'Asistencia por ' + terminologia.grupo().toLowerCase() + ', asignatura y ' + terminologia.miembro().toLowerCase() : 'Asistencia por ' + terminologia.grupo().toLowerCase() + ' y por ' + terminologia.miembro().toLowerCase() }}</p>
 
   @if (cargandoFiltros()) {
     <p class="cargando">Cargando…</p>
@@ -17,6 +17,20 @@
           (ngModelChange)="grupoId.set($event); onGrupoCambiado()"
         />
       </div>
+
+      @if (terminologia.esEducativa() && asignaturas().length > 0) {
+        <div class="filtro">
+          <label for="filtro-asignatura">Asignatura</label>
+          <p-select
+            inputId="filtro-asignatura"
+            [options]="opcionesAsignatura()"
+            optionLabel="nombre"
+            optionValue="id"
+            [ngModel]="asignaturaId()"
+            (ngModelChange)="asignaturaId.set($event); onAsignaturaCambiada()"
+          />
+        </div>
+      }
 
       <div class="filtro">
         <label for="filtro-persona">{{ terminologia.miembro() }} (opcional)</label>
@@ -78,20 +92,97 @@
     } @else if (huboConsulta() && detalle().length === 0) {
       <p-message severity="info" text="No hay sesiones en el período seleccionado." />
     } @else {
-      <p-tabs value="0">
-        <p-tablist>
-          <p-tab value="0">Resumen por {{ terminologia.grupo().toLowerCase() }}</p-tab>
-          <p-tab value="1">Resumen por persona</p-tab>
-          <p-tab value="2">Detalle</p-tab>
-        </p-tablist>
-        <p-tabpanels>
-          <p-tabpanel value="0">
+      <div class="selector-vista" role="group" aria-label="Elegir vista del reporte">
+        <span class="selector-etiqueta">Vista</span>
+        @for (v of vistas(); track v.id) {
+          <button type="button" [class.activa]="vistaActual() === v.id" [attr.aria-pressed]="vistaActual() === v.id" (click)="elegirVista(v.id)">
+            {{ v.nombre }}
+          </button>
+        }
+      </div>
+
+      @switch (vistaActual()) {
+        <!-- ───────── Resumen ───────── -->
+        @case ('resumen') {
+          <div class="kpis">
+            <div class="kpi">
+              <span class="kpi-etiqueta">% Asistencia</span>
+              <span class="kpi-valor">{{ general().porcentajeAsistencia !== null ? general().porcentajeAsistencia + '%' : '—' }}</span>
+              <span class="kpi-pie">
+                @if (nivelAsistencia(general().porcentajeAsistencia); as n) {
+                  <span class="indicador" [class]="'indicador-' + n">{{ n === 'bueno' ? 'Bien' : n === 'regular' ? 'Regular' : 'Bajo' }}</span>
+                }
+              </span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-etiqueta">{{ terminologia.sesiones() }}</span>
+              <span class="kpi-valor">{{ general().clases }}</span>
+              <span class="kpi-pie">{{ general().registros }} registros</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-etiqueta">Puntuales</span>
+              <span class="kpi-valor">{{ general().puntuales }}</span>
+              <span class="kpi-pie">{{ general().registros > 0 ? ((general().puntuales * 100) / general().registros | number: '1.0-0') + '%' : '—' }}</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-etiqueta">Tardanzas</span>
+              <span class="kpi-valor">{{ general().tardanzas }}</span>
+              <span class="kpi-pie">{{ general().porcentajeTardanza !== null ? general().porcentajeTardanza + '%' : '—' }}</span>
+            </div>
+            <div class="kpi">
+              <span class="kpi-etiqueta">Ausentes</span>
+              <span class="kpi-valor">{{ general().ausentes }}</span>
+              <span class="kpi-pie">{{ general().porcentajeAusentismo !== null ? general().porcentajeAusentismo + '%' : '—' }}</span>
+            </div>
+          </div>
+
+          <div class="paneles-resumen">
+            <section class="panel-vista">
+              <h3>Asistencia por {{ terminologia.esEducativa() ? 'asignatura' : terminologia.grupo().toLowerCase() }}</h3>
+              @if (ranking().length === 0) {
+                <p class="vacio-vista">Sin datos para el período.</p>
+              } @else {
+                <ul class="ranking">
+                  @for (r of ranking(); track r.clave) {
+                    <li>
+                      <span class="ranking-nombre">{{ r.nombre }}<small>{{ r.detalle }}</small></span>
+                      <span class="ranking-barra" aria-hidden="true">
+                        <i [class]="'nivel-' + nivelAsistencia(r.porcentaje)" [style.width.%]="r.porcentaje"></i>
+                      </span>
+                      <span class="ranking-valor">{{ r.porcentaje }}%</span>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+
+            <section class="panel-vista">
+              <h3>Asistencia por día</h3>
+              @if (serie().length === 0) {
+                <p class="vacio-vista">Sin datos para el período.</p>
+              } @else {
+                <ul class="columnas-dia" role="img" aria-label="Asistencia por día">
+                  @for (p of serie(); track p.fecha) {
+                    <li [attr.title]="p.etiqueta + ': ' + p.porcentaje + '%'">
+                      <i [class]="'nivel-' + nivelAsistencia(p.porcentaje)" [style.height.%]="p.porcentaje"></i>
+                      <span>{{ p.etiqueta }}</span>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+          </div>
+        }
+
+        <!-- ───────── Por curso o departamento (empresas) ───────── -->
+        @case ('grupo') {
+          <div class="panel panel-tabla">
             <p-table [value]="resumenGrupo()" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
               <ng-template pTemplate="header">
                 <tr>
                   <th pSortableColumn="grupo">{{ terminologia.grupo() }} <p-sortIcon field="grupo" /></th>
-                  <th pSortableColumn="sesionesTotal">Sesiones <p-sortIcon field="sesionesTotal" /></th>
-                  <th pSortableColumn="miembrosTotal">Miembros <p-sortIcon field="miembrosTotal" /></th>
+                  <th pSortableColumn="sesionesTotal">Registros <p-sortIcon field="sesionesTotal" /></th>
+                  <th pSortableColumn="miembrosTotal">{{ terminologia.miembros() }} <p-sortIcon field="miembrosTotal" /></th>
                   <th pSortableColumn="asistidas">Asistidas <p-sortIcon field="asistidas" /></th>
                   <th pSortableColumn="tardanzas">Tardanzas <p-sortIcon field="tardanzas" /></th>
                   <th pSortableColumn="porcentajeAsistencia">% Asistencia <p-sortIcon field="porcentajeAsistencia" /></th>
@@ -99,7 +190,7 @@
               </ng-template>
               <ng-template pTemplate="body" let-fila>
                 <tr>
-                  <td>{{ fila.grupo }}</td>
+                  <td class="celda-fuerte">{{ fila.grupo }}</td>
                   <td>{{ fila.sesionesTotal }}</td>
                   <td>{{ fila.miembrosTotal }}</td>
                   <td>{{ fila.asistidas }}</td>
@@ -112,43 +203,133 @@
                 </tr>
               </ng-template>
             </p-table>
-          </p-tabpanel>
+          </div>
+        }
 
-          <p-tabpanel value="1">
-            <p-table [value]="resumenPersona()" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
-              <ng-template pTemplate="header">
-                <tr>
-                  <th pSortableColumn="nombreCompleto">Nombre <p-sortIcon field="nombreCompleto" /></th>
-                  <th pSortableColumn="grupo">{{ terminologia.grupo() }} <p-sortIcon field="grupo" /></th>
-                  <th pSortableColumn="sesionesTotal">Sesiones <p-sortIcon field="sesionesTotal" /></th>
-                  <th pSortableColumn="asistidas">Asistidas <p-sortIcon field="asistidas" /></th>
-                  <th pSortableColumn="tardanzas">Tardanzas <p-sortIcon field="tardanzas" /></th>
-                  <th pSortableColumn="porcentajeAsistencia">% Asistencia <p-sortIcon field="porcentajeAsistencia" /></th>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-fila>
-                <tr>
-                  <td>{{ fila.nombreCompleto }}</td>
-                  <td>{{ fila.grupo }}</td>
-                  <td>{{ fila.sesionesTotal }}</td>
-                  <td>{{ fila.asistidas }}</td>
-                  <td>{{ fila.tardanzas }}</td>
-                  <td>
-                    <span class="indicador" [class]="'indicador-' + nivelAsistencia(fila.porcentajeAsistencia)">
-                      {{ fila.porcentajeAsistencia !== null ? fila.porcentajeAsistencia + '%' : '—' }}
-                    </span>
-                  </td>
-                </tr>
-              </ng-template>
-            </p-table>
-          </p-tabpanel>
+        <!-- ───────── Por asignatura (instituciones educativas) ───────── -->
+        @case ('asignatura') {
+          <div class="panel panel-tabla matriz-scroll">
+            @if (filasAsignatura().length === 0) {
+              <p class="vacio-vista">Sin datos para el período.</p>
+            } @else {
+              <table class="matriz tabla-asig">
+                <thead>
+                  <tr>
+                    <th>{{ terminologia.grupo() }}</th>
+                    <th>Asignatura</th>
+                    <th class="matriz-num">{{ terminologia.sesiones() }}</th>
+                    <th class="matriz-num">{{ terminologia.miembros() }}</th>
+                    <th class="matriz-num">Asistidas</th>
+                    <th class="matriz-num">Tardanzas</th>
+                    <th class="matriz-num">% Asistencia</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (f of filasAsignatura(); track f.clave) {
+                    <tr [class.fila-total]="f.esTotal">
+                      <td>{{ f.esTotal ? f.grupo : '' }}</td>
+                      <td [class.sangria]="!f.esTotal">{{ f.asignatura }}</td>
+                      <td class="matriz-num">{{ f.clases }}</td>
+                      <td class="matriz-num">{{ f.miembros }}</td>
+                      <td class="matriz-num">{{ f.asistidas }}</td>
+                      <td class="matriz-num">{{ f.tardanzas }}</td>
+                      <td class="matriz-num">
+                        <span class="indicador" [class]="'indicador-' + nivelAsistencia(f.porcentaje)">
+                          {{ f.porcentaje !== null ? f.porcentaje + '%' : '—' }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
+        }
 
-          <p-tabpanel value="2">
+        <!-- ───────── Por alumno (educativa: contra cada asignatura) o por empleado ───────── -->
+        @case ('persona') {
+          @if (terminologia.esEducativa()) {
+            <div class="panel panel-tabla matriz-scroll">
+              @if (matriz().filas.length === 0) {
+                <p class="vacio-vista">Sin datos para el período.</p>
+              } @else {
+                <table class="matriz">
+                  <thead>
+                    <tr>
+                      <th class="matriz-nombre">{{ terminologia.miembro() }}</th>
+                      <th>{{ terminologia.grupo() }}</th>
+                      @for (c of matriz().columnas; track c.clave) {
+                        <th class="matriz-num">{{ c.nombre }}</th>
+                      }
+                      <th class="matriz-num">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (f of matriz().filas; track f.usuarioId) {
+                      <tr>
+                        <td class="matriz-nombre">{{ f.nombreCompleto }}</td>
+                        <td>{{ f.grupo }}</td>
+                        @for (c of matriz().columnas; track c.clave) {
+                          <td class="matriz-num">
+                            @if (f.celdas[c.clave] !== null) {
+                              <span class="indicador" [class]="'indicador-' + nivelAsistencia(f.celdas[c.clave])">{{ f.celdas[c.clave] }}%</span>
+                            } @else {
+                              <span class="sin-dato">—</span>
+                            }
+                          </td>
+                        }
+                        <td class="matriz-num">
+                          <span class="indicador" [class]="'indicador-' + nivelAsistencia(f.total)">{{ f.total !== null ? f.total + '%' : '—' }}</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
+          } @else {
+            <div class="panel panel-tabla">
+              <p-table [value]="resumenPersona()" [paginator]="true" [rows]="10" styleClass="p-datatable-sm">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th pSortableColumn="nombreCompleto">Nombre <p-sortIcon field="nombreCompleto" /></th>
+                    <th pSortableColumn="grupo">{{ terminologia.grupo() }} <p-sortIcon field="grupo" /></th>
+                    <th pSortableColumn="sesionesTotal">{{ terminologia.sesiones() }} <p-sortIcon field="sesionesTotal" /></th>
+                    <th pSortableColumn="asistidas">Asistidas <p-sortIcon field="asistidas" /></th>
+                    <th pSortableColumn="tardanzas">Tardanzas <p-sortIcon field="tardanzas" /></th>
+                    <th pSortableColumn="porcentajeAsistencia">% Asistencia <p-sortIcon field="porcentajeAsistencia" /></th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-fila>
+                  <tr>
+                    <td class="celda-fuerte">{{ fila.nombreCompleto }}</td>
+                    <td>{{ fila.grupo }}</td>
+                    <td>{{ fila.sesionesTotal }}</td>
+                    <td>{{ fila.asistidas }}</td>
+                    <td>{{ fila.tardanzas }}</td>
+                    <td>
+                      <span class="indicador" [class]="'indicador-' + nivelAsistencia(fila.porcentajeAsistencia)">
+                        {{ fila.porcentajeAsistencia !== null ? fila.porcentajeAsistencia + '%' : '—' }}
+                      </span>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </div>
+          }
+        }
+
+        <!-- ───────── Detalle ───────── -->
+        @case ('detalle') {
+          <div class="panel panel-tabla">
             <p-table [value]="detalle()" [paginator]="true" [rows]="15" styleClass="p-datatable-sm">
               <ng-template pTemplate="header">
                 <tr>
                   <th pSortableColumn="fecha">Fecha <p-sortIcon field="fecha" /></th>
                   <th pSortableColumn="grupo">{{ terminologia.grupo() }} <p-sortIcon field="grupo" /></th>
+                  @if (terminologia.esEducativa()) {
+                    <th pSortableColumn="asignatura">Asignatura <p-sortIcon field="asignatura" /></th>
+                  }
                   <th pSortableColumn="nombre_completo">Nombre <p-sortIcon field="nombre_completo" /></th>
                   <th pSortableColumn="estado">Estado <p-sortIcon field="estado" /></th>
                 </tr>
@@ -157,6 +338,9 @@
                 <tr>
                   <td>{{ fila.fecha | date: 'dd-MM-yyyy' : 'America/Santiago' }}</td>
                   <td>{{ fila.grupo }}</td>
+                  @if (terminologia.esEducativa()) {
+                    <td>{{ nombreAsignatura(fila) }}</td>
+                  }
                   <td>{{ fila.nombre_completo }}</td>
                   <td>
                     <span class="estado-badge" [class]="'estado-' + fila.estado">
@@ -166,9 +350,9 @@
                 </tr>
               </ng-template>
             </p-table>
-          </p-tabpanel>
-        </p-tabpanels>
-      </p-tabs>
+          </div>
+        }
+      }
     }
   }
 </div>

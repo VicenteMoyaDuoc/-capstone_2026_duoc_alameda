@@ -1,44 +1,68 @@
-<div class="pagina">
-  <app-navbar titulo="Mi historial" />
+<app-marco-movil>
+  <div saludo>
+    <h1>Mi historial</h1>
+    <p class="bajada">Tus {{ terminologia.sesiones().toLowerCase() }} registradas</p>
+  </div>
 
-  <main class="historial">
-    <h1>Mi historial de {{ terminologia.sesiones().toLowerCase() }}</h1>
+  <section class="m-tarjeta resumen">
+    @if (cargando()) {
+      <div class="skel"></div>
+    } @else {
+      <ul>
+        <li>
+          <strong>{{ metricas().porcentajeAsistencia !== null ? metricas().porcentajeAsistencia + '%' : '—' }}</strong>
+          <span>Asistencia</span>
+        </li>
+        <li>
+          <strong>{{ metricas().asistidas }}</strong>
+          <span>Presentes</span>
+        </li>
+        <li>
+          <strong>{{ metricas().tardanzas }}</strong>
+          <span>Tardanzas</span>
+        </li>
+        <li>
+          <strong>{{ ausencias() }}</strong>
+          <span>Ausencias</span>
+        </li>
+      </ul>
+    }
+  </section>
 
-    @if (!cargando()) {
-      <section class="resumen">
-        <div class="tarjeta">
-          <span class="valor">{{ metricas().porcentajeAsistencia !== null ? metricas().porcentajeAsistencia + '%' : '—' }}</span>
-          <span class="etiqueta">Asistencia</span>
-        </div>
-        <div class="tarjeta">
-          <span class="valor">{{ metricas().asistidas }}</span>
-          <span class="etiqueta">Presentes</span>
-        </div>
-        <div class="tarjeta">
-          <span class="valor">{{ metricas().tardanzas }}</span>
-          <span class="etiqueta">Tardanzas</span>
-        </div>
-      </section>
+  @if (!cargando()) {
+    <div class="filtros" role="group" aria-label="Filtrar registros">
+      @for (f of filtros; track f.id) {
+        <button type="button" [class.activo]="filtro() === f.id" [attr.aria-pressed]="filtro() === f.id" (click)="filtro.set(f.id)">
+          {{ f.nombre }}
+        </button>
+      }
+    </div>
 
+    <section class="m-tarjeta">
       @if (filasOrdenadas().length > 0) {
         <ul class="lista">
           @for (fila of filasOrdenadas(); track fila.sesion_id) {
-            <li>
+            <li [attr.data-estado]="fila.estado">
               <div class="fecha">
                 <strong>{{ formatearFecha(fila.fecha) }}</strong>
-                @if (fila.registrado_en) {
-                  <span>{{ formatearHora(fila.registrado_en) }}</span>
-                }
+                <span>
+                  {{ fila.asignatura ?? terminologia.sesion() }}
+                  @if (fila.registrado_en) {
+                    · {{ formatearHora(fila.registrado_en) }}
+                  }
+                </span>
               </div>
-              <span class="estado" [class.tardanza]="fila.estado === 'tardanza'" [class.ausente]="fila.estado === 'ausente'">
+              <span class="m-pastilla" [class.tardanza]="fila.estado === 'tardanza'" [class.ausente]="fila.estado === 'ausente'">
                 {{ fila.estado === 'puntual' ? 'A tiempo' : fila.estado === 'tardanza' ? 'Tardanza' : 'Ausente' }}
               </span>
             </li>
           }
         </ul>
       } @else {
-        <p class="vacio">Todavía no tienes registros de asistencia.</p>
+        <p class="vacio">
+          {{ filas().length === 0 ? 'Todavía no tienes registros de asistencia.' : 'No hay registros con ese filtro.' }}
+        </p>
       }
-    }
-  </main>
-</div>
+    </section>
+  }
+</app-marco-movil>

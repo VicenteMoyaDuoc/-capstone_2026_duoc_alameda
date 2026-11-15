@@ -1,43 +1,178 @@
-<h1>Institución</h1>
-<p class="subtitulo">Datos generales y configuración</p>
+<div class="encabezado">
+  <div>
+    <h1>Institución</h1>
+    <p class="subtitulo">Datos generales y configuración</p>
+  </div>
+  @if (!cargando()) {
+    <button pButton type="submit" form="form-institucion" [loading]="guardando()" [disabled]="guardando()">
+      Guardar cambios
+    </button>
+  }
+</div>
 
 @if (!cargando()) {
-  <form class="form-institucion" [formGroup]="form" (ngSubmit)="guardar()">
-    <div class="campo">
-      <label for="nombre">Nombre</label>
-      <input pInputText id="nombre" formControlName="nombre" />
-    </div>
-
-    <div class="campo">
-      <label for="tipo">Tipo</label>
-      <input pInputText id="tipo" [value]="tipoInstitucion() === 'corporativa' ? 'Corporativa' : 'Educativa'" disabled />
-      <span class="ayuda">El tipo no se puede cambiar después de crear la institución (define la terminología de toda la app).</span>
-    </div>
-
-    <h2>Configuración de asistencia</h2>
-
-    <div class="campo">
-      <label for="tolerancia_min">Tolerancia de tardanza (minutos)</label>
-      <p-inputnumber inputId="tolerancia_min" formControlName="tolerancia_min" [min]="0" [max]="120" suffix=" min" />
-      <span class="ayuda">Hasta este tiempo después del inicio, se marca "puntual". Después, "tardanza". Rango: 0 a 120.</span>
-    </div>
-
-    <div class="campo">
-      <label for="duracion_sesion_min">Duración de la {{ terminologia.sesion().toLowerCase() }} (minutos)</label>
-      <p-inputnumber inputId="duracion_sesion_min" formControlName="duracion_sesion_min" [min]="5" [max]="480" suffix=" min" />
-      <span class="ayuda">Tiempo máximo en que se pueden seguir registrando asistencias. Rango: 5 a 480.</span>
-    </div>
-
-    <div class="campo">
-      <label for="qr_ttl_seg">Vigencia del código QR (segundos)</label>
-      <p-inputnumber inputId="qr_ttl_seg" formControlName="qr_ttl_seg" [min]="20" [max]="300" suffix=" seg" />
-      <span class="ayuda">Cada cuánto rota el QR automáticamente. Rango: 20 a 300.</span>
-    </div>
-
+  <form id="form-institucion" class="institucion" [formGroup]="form" (ngSubmit)="guardar()">
     @if (mensaje(); as m) {
       <p-message [severity]="m.tipo" [text]="m.texto" />
     }
 
-    <button pButton type="submit" [loading]="guardando()" [disabled]="guardando()">Guardar cambios</button>
+    <div class="paneles">
+      <section class="panel">
+        <header class="panel-cab">
+          <h2>Datos generales</h2>
+          <p>Identifican a tu institución dentro de la app.</p>
+        </header>
+        <div class="panel-cuerpo campos">
+          <div class="campo">
+            <label for="nombre">Nombre</label>
+            <input pInputText id="nombre" formControlName="nombre" />
+          </div>
+
+          <div class="campo">
+            <label for="tipo">Tipo</label>
+            <input pInputText id="tipo" [value]="tipoInstitucion() === 'corporativa' ? 'Corporativa' : 'Educativa'" disabled />
+            <span class="ayuda">No se puede cambiar después de crear la institución: define la terminología de toda la app.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <header class="panel-cab">
+          <h2>Configuración de asistencia</h2>
+          <p>Reglas con las que se calcula la puntualidad y la vigencia del código QR.</p>
+        </header>
+        <div class="panel-cuerpo campos campos--rejilla">
+          <div class="campo">
+            <label for="tolerancia_min">Tolerancia de tardanza</label>
+            <p-inputnumber inputId="tolerancia_min" formControlName="tolerancia_min" [min]="0" [max]="120" suffix=" min" />
+            <span class="ayuda">Hasta este tiempo después del inicio se marca "puntual"; después, "tardanza". Rango: 0 a 120 minutos.</span>
+          </div>
+
+          <div class="campo">
+            <label for="duracion_sesion_min">Duración de la {{ terminologia.sesion().toLowerCase() }}</label>
+            <p-inputnumber inputId="duracion_sesion_min" formControlName="duracion_sesion_min" [min]="5" [max]="480" suffix=" min" />
+            <span class="ayuda">Tiempo máximo en que se pueden seguir registrando asistencias. Rango: 5 a 480 minutos.</span>
+          </div>
+
+          <div class="campo">
+            <label for="qr_ttl_seg">Vigencia del código QR</label>
+            <p-inputnumber inputId="qr_ttl_seg" formControlName="qr_ttl_seg" [min]="20" [max]="300" suffix=" seg" />
+            <span class="ayuda">Cada cuánto rota el QR automáticamente. Rango: 20 a 300 segundos.</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="panel">
+      <header class="panel-cab">
+        <h2>Verificación de ubicación</h2>
+        <p>Exige que el alumno esté físicamente en el lugar al registrar su asistencia con el QR.</p>
+      </header>
+
+      @if (!geoDisponible()) {
+        <div class="panel-cuerpo">
+          <p-message
+            severity="warn"
+            text="Esta función necesita la migración 12 en Supabase (supabase/migrations/20261114_12_geolocalizacion.sql). Ejecútala y recarga la página."
+          />
+        </div>
+      } @else {
+        <div class="panel-cuerpo campos">
+          @if (mensajeGeo(); as g) {
+            <p-message [severity]="g.tipo" [text]="g.texto" />
+          }
+
+          <div class="campos campos--rejilla">
+            <div class="campo campo--ancho">
+              <label for="geo_modo">Modo</label>
+              <p-select inputId="geo_modo" formControlName="geo_modo" [options]="modosGeo" optionLabel="etiqueta" optionValue="valor" appendTo="body" />
+              @switch (modoGeo) {
+                @case ('proximidad') {
+                  <span class="ayuda">
+                    El alumno debe estar dentro del radio de la sede. Sirve para confirmar que está en el campus, no en qué sala.
+                  </span>
+                }
+                @case ('exacta') {
+                  <span class="ayuda">
+                    El alumno debe estar a pocos metros de donde el profesor inició la clase: es decir, en la sala. El profesor
+                    debe tener el GPS activo al iniciarla. Se rechaza a quien tenga una señal GPS poco precisa (más de 35 m de error).
+                  </span>
+                }
+                @default {
+                  <span class="ayuda">No se pide ubicación: basta con escanear el QR.</span>
+                }
+              }
+            </div>
+          </div>
+
+          @if (modoGeo !== 'off') {
+            <div class="campos campos--rejilla">
+              <div class="campo">
+                <label for="sede_lat">Latitud de la sede</label>
+                <p-inputnumber
+                  inputId="sede_lat"
+                  formControlName="sede_lat"
+                  locale="en-US"
+                  [useGrouping]="false"
+                  [minFractionDigits]="0"
+                  [maxFractionDigits]="7"
+                  [min]="-90"
+                  [max]="90"
+                />
+              </div>
+
+              <div class="campo">
+                <label for="sede_lng">Longitud de la sede</label>
+                <p-inputnumber
+                  inputId="sede_lng"
+                  formControlName="sede_lng"
+                  locale="en-US"
+                  [useGrouping]="false"
+                  [minFractionDigits]="0"
+                  [maxFractionDigits]="7"
+                  [min]="-180"
+                  [max]="180"
+                />
+              </div>
+
+              <div class="campo">
+                <label for="radio_proximidad_m">Radio de la sede</label>
+                <p-inputnumber inputId="radio_proximidad_m" formControlName="radio_proximidad_m" [min]="50" [max]="5000" suffix=" m" />
+                <span class="ayuda">Modo proximidad. Rango: 50 a 5000 m. Se perdona el error del GPS (hasta 100 m).</span>
+              </div>
+
+              <div class="campo">
+                <label for="radio_exacto_m">Radio de la sala</label>
+                <p-inputnumber inputId="radio_exacto_m" formControlName="radio_exacto_m" [min]="10" [max]="200" suffix=" m" />
+                <span class="ayuda">Modo exacta. Rango: 10 a 200 m, medido desde el profesor.</span>
+              </div>
+            </div>
+
+            <div class="acciones-geo">
+              <button pButton type="button" severity="secondary" (click)="usarSedeAlameda()">Usar sede Alameda (Duoc UC)</button>
+              <button pButton type="button" severity="secondary" [loading]="localizando()" [disabled]="localizando()" (click)="usarMiUbicacion()">
+                Usar mi ubicación actual
+              </button>
+            </div>
+            <div class="campo campo--ancho">
+              <app-mapa-ubicacion
+                [lat]="form.controls.sede_lat.value"
+                [lng]="form.controls.sede_lng.value"
+                [radio]="form.controls.radio_proximidad_m.value"
+                (elegida)="elegirEnMapa($event)"
+              />
+              <span class="ayuda">
+                El círculo es la zona de la sede (radio de proximidad). Haz clic en el mapa para mover la sede. En modo exacta, el
+                centro de la sala se fija donde está el profesor al iniciar la clase.
+              </span>
+            </div>
+            <span class="ayuda">
+              Las coordenadas de Alameda (Av. España 8) vienen de OpenStreetMap. Para mayor precisión, párate en la entrada de la sede
+              y usa «Usar mi ubicación actual». Del alumno solo se guarda la distancia al punto, no sus coordenadas.
+            </span>
+          }
+        </div>
+      }
+    </section>
   </form>
 }

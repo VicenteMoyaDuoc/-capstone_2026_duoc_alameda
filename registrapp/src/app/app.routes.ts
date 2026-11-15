@@ -69,6 +69,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/usuarios/usuarios.component').then((m) => m.UsuariosComponent)
       },
       {
+        path: 'solicitudes',
+        loadComponent: () => import('./features/admin/solicitudes/solicitudes.component').then((m) => m.SolicitudesAdminComponent)
+      },
+      {
         path: 'asistencia',
         loadComponent: () => import('./features/admin/asistencia/asistencia.component').then((m) => m.AdminAsistenciaComponent)
       },
@@ -83,6 +87,13 @@ export const routes: Routes = [
     canActivate: [roleGuard],
     data: { rol: 'responsable' },
     loadComponent: () => import('./features/responsable/panel/panel.component').then((m) => m.PanelComponent)
+  },
+  {
+    path: 'responsable/solicitudes',
+    canActivate: [roleGuard],
+    data: { rol: 'responsable' },
+    loadComponent: () =>
+      import('./features/responsable/solicitudes/solicitudes.component').then((m) => m.SolicitudesResponsableComponent)
   },
   {
     path: 'asistir',

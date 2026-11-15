@@ -7,6 +7,12 @@ export interface Institucion {
   tolerancia_min: number;
   duracion_sesion_min: number;
   qr_ttl_seg: number;
+  /** Verificación de ubicación al registrar asistencia: apagada, en la sede o exacta en la sala. */
+  geo_modo: 'off' | 'proximidad' | 'exacta';
+  sede_lat: number | null;
+  sede_lng: number | null;
+  radio_proximidad_m: number;
+  radio_exacto_m: number;
   created_at: string;
 }
 

@@ -4,9 +4,20 @@ import { manejarPreflight } from '../_shared/cors.ts';
 import { jsonRespuesta, errorRespuesta } from '../_shared/respuesta.ts';
 import { clienteAdmin, obtenerUsuarioLlamador, registrarAuditoria, type UsuarioLlamador } from '../_shared/supabase-admin.ts';
 import { verificarToken } from '../_shared/qr.ts';
+import { datosGeoRespuesta, evaluarUbicacion, mensajeGeo, type ModoGeo, type PuntoReferencia } from '../_shared/geo.ts';
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 
-const esquemaEntrada = z.object({ token: z.string().min(10).max(2000) });
+const esquemaEntrada = z.object({
+  token: z.string().min(10).max(2000),
+  // Solo se usa si la clase exige ubicación. Si la clase la exige y no viene, se responde UBICACION_REQUERIDA.
+  ubicacion: z
+    .object({
+      lat: z.number().min(-90).max(90),
+      lng: z.number().min(-180).max(180),
+      precision: z.number().min(0).max(1_000_000)
+    })
+    .optional()
+});
 
 const LIMITE_RECHAZOS = 10;
 const VENTANA_RECHAZOS_MIN = 5;
@@ -136,6 +147,37 @@ Deno.serve(async (req) => {
     return respuestaYaRegistrado(admin, llamador, sesionId, asistenciaExistente['registrado_en'] as string, origin);
   }
 
+  // Ubicación: la regla quedó fijada en la sesión al iniciarla (proximidad a la sede, o exacta en la sala).
+  const modoGeo = ((sesion['geo_modo'] as ModoGeo | null) ?? 'off') as ModoGeo;
+  const referencia: PuntoReferencia | null =
+    sesion['geo_lat'] !== null && sesion['geo_lat'] !== undefined && sesion['geo_lng'] !== null && sesion['geo_radio_m'] !== null
+      ? { lat: sesion['geo_lat'] as number, lng: sesion['geo_lng'] as number, radioM: sesion['geo_radio_m'] as number }
+      : null;
+  const veredicto = evaluarUbicacion(modoGeo, referencia, parseo.data.ubicacion);
+
+  if (!veredicto.ok) {
+    if (veredicto.code === 'UBICACION_REQUERIDA') {
+      // No es un rechazo: el cliente vuelve a llamar con la ubicación. No se audita ni cuenta como intento fallido.
+      return jsonRespuesta(
+        422,
+        { ok: false, code: 'UBICACION_REQUERIDA', message: mensajeGeo('UBICACION_REQUERIDA', modoGeo, 'alumno'), data: { modo: modoGeo } },
+        origin
+      );
+    }
+    await registrarAuditoria(admin, 'asistencia_rechazada', llamador.institucionId, llamador.usuarioId, {
+      code: veredicto.code,
+      sesion_id: sesionId,
+      geo_modo: modoGeo,
+      distancia_m: veredicto.distanciaM,
+      precision_m: parseo.data.ubicacion?.precision ?? null
+    });
+    return jsonRespuesta(
+      403,
+      { ok: false, code: veredicto.code, message: mensajeGeo(veredicto.code, modoGeo, 'alumno'), data: datosGeoRespuesta(modoGeo, referencia, veredicto.distanciaM) },
+      origin
+    );
+  }
+
   const estado = dentroDeTolerancia(sesion['inicio'] as string, sesion['tolerancia_min'] as number, ahora) ? 'puntual' : 'tardanza';
 
   const { data: nuevaAsistencia, error: errorInsert } = await admin
@@ -147,7 +189,10 @@ Deno.serve(async (req) => {
       asignatura_id: sesion['asignatura_id'] ?? null,
       usuario_id: llamador.usuarioId,
       estado,
-      origen: 'qr'
+      origen: 'qr',
+      // Solo distancia y precisión; las coordenadas del alumno no se guardan.
+      geo_distancia_m: veredicto.distanciaM,
+      geo_precision_m: veredicto.distanciaM === null ? null : (parseo.data.ubicacion?.precision ?? null)
     })
     .select('registrado_en')
     .single();
@@ -189,7 +234,9 @@ Deno.serve(async (req) => {
         registrado_en: nuevaAsistencia['registrado_en'],
         grupo: grupoInfo,
         asignatura: asignaturaInfo,
-        sesion: { id: sesion['id'] }
+        sesion: { id: sesion['id'] },
+        // Para mostrarle al alumno el mapa y la distancia (null si la clase no pide ubicación).
+        geo: modoGeo === 'off' || !referencia ? null : datosGeoRespuesta(modoGeo, referencia, veredicto.distanciaM)
       }
     },
     origin

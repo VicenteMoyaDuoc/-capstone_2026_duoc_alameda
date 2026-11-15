@@ -1,0 +1,78 @@
+<h1>Solicitudes</h1>
+<p class="subtitulo">Los {{ terminologia.responsables().toLowerCase() }} te piden asignaturas o te escriben mensajes. Respóndeles aquí mismo.</p>
+
+@if (mensaje(); as m) {
+  <p-message [severity]="m.tipo" [text]="m.texto" styleClass="mensaje" />
+}
+
+<div class="selector-vista" role="group" aria-label="Filtrar solicitudes">
+  <button type="button" [class.activa]="vista() === 'pendientes'" [attr.aria-pressed]="vista() === 'pendientes'" (click)="vista.set('pendientes')">
+    Pendientes ({{ pendientes().length }})
+  </button>
+  <button type="button" [class.activa]="vista() === 'resueltas'" [attr.aria-pressed]="vista() === 'resueltas'" (click)="vista.set('resueltas')">
+    Resueltas ({{ resueltas().length }})
+  </button>
+</div>
+
+<section class="panel">
+  @if (cargando()) {
+    <div class="skel"></div>
+  } @else if (visibles().length === 0) {
+    <p class="vacio">
+      {{ vista() === 'pendientes' ? 'No hay solicitudes pendientes.' : 'Todavía no has resuelto solicitudes.' }}
+    </p>
+  } @else {
+    <ul class="lista">
+      @for (s of visibles(); track s.id) {
+        <li [attr.data-estado]="s.estado">
+          <div class="cabecera-item">
+            <div class="info">
+              <span class="tipo">{{ s.tipo === 'asignatura' ? 'Nueva asignatura' : 'Mensaje' }}</span>
+              <strong>{{ s.nombre }}</strong>
+              <span class="meta">{{ nombreGrupo(s.grupo_id) }} · {{ nombreUsuario(s.solicitante_id) }} · {{ fechaRelativa(s.created_at) }}</span>
+            </div>
+
+            @if (s.estado !== 'pendiente') {
+              <span class="pastilla" [attr.data-estado]="s.estado">{{ etiquetaEstado(s) }}</span>
+            }
+          </div>
+
+          @if (s.detalle) {
+            <p class="detalle">{{ s.detalle }}</p>
+          }
+
+          @if (s.estado === 'pendiente') {
+            <!-- Se responde justo debajo de la solicitud -->
+            <div class="responder">
+              <label [attr.for]="'resp-' + s.id">
+                {{ s.tipo === 'consulta' ? 'Tu respuesta' : 'Comentario para el profesor (opcional)' }}
+              </label>
+              <textarea
+                [id]="'resp-' + s.id"
+                rows="2"
+                maxlength="600"
+                [placeholder]="s.tipo === 'consulta' ? 'Escribe tu respuesta…' : 'Ej: Aprobada, ya puedes abrir la clase.'"
+                [ngModel]="texto(s.id)"
+                (ngModelChange)="escribir(s.id, $event)"
+              ></textarea>
+
+              <div class="acciones">
+                @if (s.tipo === 'consulta') {
+                  <button pButton type="button" icon="pi pi-send" label="Responder" [disabled]="!texto(s.id).trim() || procesandoId() === s.id" [loading]="procesandoId() === s.id" (click)="responder(s)"></button>
+                } @else {
+                  <button pButton type="button" severity="secondary" [outlined]="true" label="Rechazar" [disabled]="procesandoId() === s.id" (click)="rechazar(s)"></button>
+                  <button pButton type="button" icon="pi pi-check" label="Aprobar" [loading]="procesandoId() === s.id" (click)="aprobar(s)"></button>
+                }
+              </div>
+            </div>
+          } @else if (s.respuesta) {
+            <div class="respuesta">
+              <strong>{{ s.tipo === 'consulta' ? 'Tu respuesta' : 'Tu comentario' }}</strong>
+              <p>{{ s.respuesta }}</p>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

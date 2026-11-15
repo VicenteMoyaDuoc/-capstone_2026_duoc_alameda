@@ -1,24 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Rol } from '../models/models';
+import { errorDeFuncion } from '../errores/catalogo-errores';
 
 interface RespuestaFuncion<T> {
   ok: boolean;
   code?: string;
   message?: string;
   data?: T;
-}
-
-async function extraerMensajeError(error: unknown): Promise<string> {
-  if (error && typeof error === 'object' && 'context' in error) {
-    try {
-      const cuerpo = await (error as { context: Response }).context.json();
-      if (cuerpo?.message) return cuerpo.message as string;
-    } catch {
-      // sin cuerpo JSON legible, se usa el mensaje genérico
-    }
-  }
-  return 'Ocurrió un error. Intenta nuevamente.';
 }
 
 @Injectable({
@@ -38,7 +27,7 @@ export class AdministracionService {
     );
 
     if (error || !data?.ok || !data.data) {
-      throw new Error(error ? await extraerMensajeError(error) : (data?.message ?? 'No se pudo crear la institución.'));
+      throw await errorDeFuncion(error, data, 'ERROR_INTERNO');
     }
 
     return data.data;
@@ -56,7 +45,7 @@ export class AdministracionService {
     >('crear-usuario', { body: datos });
 
     if (error || !data?.ok || !data.data) {
-      throw new Error(error ? await extraerMensajeError(error) : (data?.message ?? 'No se pudo crear el usuario.'));
+      throw await errorDeFuncion(error, data, 'ERROR_INTERNO');
     }
 
     return data.data;
@@ -86,7 +75,7 @@ export class AdministracionService {
     const { data, error } = await this.supabase.functions.invoke<RespuestaFuncion<T>>('actualizar-usuario', { body });
 
     if (error || !data?.ok) {
-      throw new Error(error ? await extraerMensajeError(error) : (data?.message ?? 'No se pudo completar la operación.'));
+      throw await errorDeFuncion(error, data, 'ERROR_INTERNO');
     }
 
     return data.data;

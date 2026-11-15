@@ -69,3 +69,41 @@
   font-weight: 600;
   text-decoration: none;
 }
+
+.mapa-resultado {
+  width: 100%;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .distancia {
+    font-size: 14px;
+    color: var(--rp-text-muted, #666);
+  }
+}
+
+.etiqueta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 700;
+
+  i {
+    font-size: 14px;
+    margin: 0;
+  }
+
+  &--ok {
+    background: #dcfce7;
+    color: #14532d;
+  }
+
+  &--fuera {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+}
