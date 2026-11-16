@@ -50,7 +50,9 @@ Plataforma web de gestión de asistencia mediante código QR firmado. Sustituye 
 
 ## Demo en vivo
 
-> (pendiente — se agrega el enlace de Vercel una vez desplegado)
+Video de demostración del funcionamiento de Registrapp. Al abrir el enlace, GitHub lo reproduce directamente:
+
+**[▶ Ver el video de la demo](https://github.com/VicenteMoyaDuoc/-capstone_2026_duoc_alameda/blob/main/Fase%202/Evidencias%20Grupales/Registrapp_Demo_16_11.mp4)**
 
 ## Cómo ejecutar el proyecto localmente
 
